@@ -1,7 +1,14 @@
-import pandas as pd
-df = pd.DataFrame({'AAA' : [1,2,1,3], 'BBB' : [1,1,2,2], 'CCC' : [2,1,3,1]})
-source_cols = df.columns
-new_cols = [str(x) + "_cat" for x in source_cols]
-categories = {1 : 'Alpha', 2 : 'Beta', 3 : 'Charlie' }
-df[new_cols] = df[source_cols].applymap(categories.get)
-df.sort_values(['AAA_cat','BBB_cat'],ascending=[0,1],inplace=True)
+
+import numpy as np
+
+data = [12, 34, 29, 38, 34, 51, 29, 34, 47, 34, 55, 94, 68, 81]
+x = np.arange(0,len(data))
+print("x", x)
+y=np.array(data)
+print("y", y)
+z = np.polyfit(x,y,1)
+print("z", z[0])
+print("{0}x + {1}".format(*z))
+
+
+

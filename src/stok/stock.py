@@ -99,12 +99,12 @@ class SerialComm(QMainWindow, Ui_MainWindow):
 
 
     def initEvent(self):
-        self.m15_button.clicked.connect(self.get_k15_history_data)
-        self.m30_button.clicked.connect(self.get_k30_history_data)
-        self.day_button.clicked.connect(self.get_kd_history_data)
-        self.m15_b_button.clicked.connect(self.get_k15_history_data_b)
-        self.m30_b_button.clicked.connect(self.get_k30_history_data_b)
-        self.day_b_button.clicked.connect(self.get_kd_history_data_b)
+        self.km15_button.clicked.connect(self.get_k15_history_data)
+        self.km30_button.clicked.connect(self.get_k30_history_data)
+        self.kmd_button.clicked.connect(self.get_kd_history_data)
+        self.kmb15_button.clicked.connect(self.get_k15_history_data_b)
+        self.kmb30_button.clicked.connect(self.get_k30_history_data_b)
+        self.kmbd_button.clicked.connect(self.get_kd_history_data_b)
         self.insert_optional_button.clicked.connect(self.insert_optional_stock_table)
         self.delete_optional_button.clicked.connect(self.delete_optional_stock_table)
         self.sync_stock_data_button.clicked.connect(self.sync_data)
@@ -287,7 +287,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
     def show_kkd_line(self):
         # start_date = self.start_date_edit.text()
         # end_date = self.end_date_edit.text()
-        # time_period = self.time_period_combobox.currentText()
         stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_d'
         start_date = '2019-01-01'
@@ -296,27 +295,34 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
         stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'ptcChg'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
-        stock_dataframe.set_index('Date', inplace=True)
+        # stock_dataframe.set_index('Date', inplace=True)
 
-        # show_datas = stock_dataframe['2020-10-01':end_date]
-        # print("show_len", show_datas.head(20))
-        # print("show_", show_datas.tail(24))
-
-        show_datas = stock_dataframe.tail(112)  # 取尾部112个数据
-
-        show_datas_red = show_datas[(show_datas['ptcChg'] >= 0)].sort_values(by="Close", ascending=True)
-        show_datas_green = show_datas[(show_datas['ptcChg'] < 0)].sort_values(by="Close", ascending=False)
+        stock_dataframe = stock_dataframe.tail(112)  # 取尾部112个数据
+        show_datas_red = stock_dataframe[(stock_dataframe['ptcChg'] >= 0)].sort_values(by="Close", ascending=True)
+        show_datas_green = stock_dataframe[(stock_dataframe['ptcChg'] < 0)].sort_values(by="Close", ascending=False)
         show_datas = pd.concat([show_datas_red, show_datas_green] , axis=0)  #拼接
         # show_datas_red = show_datas[show_datas['ptcChg'] >= 0]
         # show_datas_red = show_datas_red.sort_values(by="Close", ascending=True)
         # show_datas_green = show_datas[show_datas['ptcChg'] < 0]
         # show_datas_green  = show_datas_green.sort_values(by="Close", ascending=False)
+        red_az =  show_datas_red['Close']
+        x = np.arange(0, len(red_az))
+        y = np.array(red_az)
+        z = np.polyfit(x, y, 1)
+        self.linearxr_LCDNumber.display(z[0])
+        self.linearyr_LCDNumber.display(z[1])
 
-        # show_datas = show_datas_red.join(show_datas_green)
-        # show_datas = pd.concat([show_datas_red, show_datas_green], axis=1, verify_integrity = True)
-        # show_datas = pd.merge(show_datas_red, show_datas_green, how='outer',on='Date')
+        green_az = show_datas_green['Close']
+        x = np.arange(0, len(green_az))
+        y = np.array(green_az)
+        z = np.polyfit(x, y, 1)
+        self.linearxg_LCDNumber.display(z[0])
+        self.linearyg_LCDNumber.display(z[1])
 
-        print("vvvvvvvvvv", show_datas)
+
+        # print("show_datas_red", len(show_datas_red), show_datas_red)
+        #
+        # print("vvvvvvvvvv", show_datas)
 
         # print(show_datas.sort_index(axis=1))
         #dataframe根据行索引进行降序排序（排序时默认升序，调节ascending参数
@@ -326,6 +332,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         # stock_dataframe.to_excel('data/SPY_20110701_20120630_Bollinger4.xlsx')
         # print("dd", stock_dataframe[1])
         # print("stock_dataframe2", stock_dataframe)
+        show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
 
