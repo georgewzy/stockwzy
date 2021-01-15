@@ -1,6 +1,6 @@
 #!/home/wzy/PycharmProjects/hamClinet/venv/bin/python3.5
 import sys, os
-
+import math
 
 import numpy as np
 import baostock as bs
@@ -285,19 +285,19 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         self.dc.update_figure_k_line(show_datas)
 
     def show_kkd_line(self):
-        # start_date = self.start_date_edit.text()
-        # end_date = self.end_date_edit.text()
+        start_date = self.start_date_edit.text()
+        end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_d'
-        start_date = '2019-01-01'
-        end_date = str(datetime.datetime.now().date())
+        # start_date = '2019-01-01'
+        # end_date = str(datetime.datetime.now().date())
 
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
         stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'ptcChg'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
         # stock_dataframe.set_index('Date', inplace=True)
 
-        stock_dataframe = stock_dataframe.tail(112)  # 取尾部112个数据
+        # stock_dataframe = stock_dataframe.tail(112)  # 取尾部112个数据
         show_datas_red = stock_dataframe[(stock_dataframe['ptcChg'] >= 0)].sort_values(by="Close", ascending=True)
         show_datas_green = stock_dataframe[(stock_dataframe['ptcChg'] < 0)].sort_values(by="Close", ascending=False)
         show_datas = pd.concat([show_datas_red, show_datas_green] , axis=0)  #拼接
@@ -309,6 +309,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
+        r = math.tan(z[0])
+        self.red_LCDNumber.display(r*100) #放大100倍 显示方便
         self.linearxr_LCDNumber.display(z[0])
         self.linearyr_LCDNumber.display(z[1])
 
@@ -316,6 +318,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
+        g = math.tan(abs(z[0]))
+        self.green_LCDNumber.display(g*100) #放大100倍 显示方便
         self.linearxg_LCDNumber.display(z[0])
         self.linearyg_LCDNumber.display(z[1])
 
