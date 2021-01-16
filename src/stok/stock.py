@@ -109,18 +109,19 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         self.delete_optional_button.clicked.connect(self.delete_optional_stock_table)
         self.sync_stock_data_button.clicked.connect(self.sync_data)
         self.show_stock_data_button.clicked.connect(self.show_kd_line)
-        self.k5_buttion.clicked.connect(self.show_kd_line)
         self.k15_buttion.clicked.connect(self.show_k15_line)
         self.k30_buttion.clicked.connect(self.show_k30_line)
         self.k60_buttion.clicked.connect(self.show_k30_line)
         self.kd_buttion.clicked.connect(self.show_kd_line)
         self.kclear_buttion.clicked.connect(self.clear_figure)
-
-        # self.kk5_buttion.clicked.connect(self.show_kkd_line)
         self.kk15_buttion.clicked.connect(self.show_kk15_line)
-        # self.kk30_buttion.clicked.connect(self.show_kk30_line)
-        # self.kk60_buttion.clicked.connect(self.show_kk60_line)
+        self.kk30_buttion.clicked.connect(self.show_kk15_line)
+        self.kk60_buttion.clicked.connect(self.show_kk15_line)
         self.kkd_buttion.clicked.connect(self.show_kkd_line)
+        self.kkk15_buttion.clicked.connect(self.show_kk15_line)
+        self.kkk30_buttion.clicked.connect(self.show_kk15_line)
+        self.kkk60_buttion.clicked.connect(self.show_kk15_line)
+        self.kkkd_buttion.clicked.connect(self.show_kkkd_line)
 
         self.errorSignal.connect(self.errorHint)
         self.showSerialComboboxSignal.connect(self.showCombobox)
@@ -183,7 +184,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
             self.sql.create_day_kline_table(name_day)
             self.sql.create_minute_kline_table(name_15)
             self.sql.create_minute_kline_table(name_30)
-            print(name_day, name_15, name_30)
 
         start_date = '2019-01-01'
         end_date = str(datetime.datetime.now().date())
@@ -199,77 +199,97 @@ class SerialComm(QMainWindow, Ui_MainWindow):
             name_15 = 'k' + res[i][0] + '_15'
             name_30 = 'k' + res[i][0] + '_30'
             #日线
-            lg = bs.login()
-            print('login respond error_code:' + lg.error_code)
-            print('login respond  error_msg:' + lg.error_msg)
-            rd = bs.query_history_k_data_plus(stock_code,
-                                              "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,isST",
-                                              start_date=start_date, end_date=end_date,
-                                              frequency="d",
-                                              adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+            stock = self.sql.get_all_data_of_stock(name_day, start_date, end_date)
+            stock_dataframe = pd.DataFrame(stock)
+            last_date= stock_dataframe.tail(1).iloc[0,0]
+            print("last_datelast_date", last_date, end_date)
 
-            day_list = []
-            while (rd.error_code == '0') & rd.next():
-                # 获取一条记录，将记录合并在一起
-                day_list.append(rd.get_row_data())
-            for i in range(len(day_list)):
-                self.sql.insert_day_kline_data(name_day, day_list[i][0], day_list[i][1], day_list[i][2],
-                                               day_list[i][3], day_list[i][4], day_list[i][5],
-                                               day_list[i][6], day_list[i][7], day_list[i][8],
-                                               day_list[i][9], day_list[i][10], day_list[i][11],
-                                               day_list[i][12])
+            if last_date != end_date:
+                lg = bs.login()
+                print('login respond error_code:' + lg.error_code)
+                print('login respond  error_msg:' + lg.error_msg)
+                rd = bs.query_history_k_data_plus(stock_code,
+                                                  "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,isST",
+                                                  start_date=last_date, end_date=end_date,
+                                                  frequency="d",
+                                                  adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+
+                day_list = []
+                while (rd.error_code == '0') & rd.next():
+                    # 获取一条记录，将记录合并在一起
+                    day_list.append(rd.get_row_data())
+                for i in range(len(day_list)):
+                    self.sql.insert_day_kline_data(name_day, day_list[i][0], day_list[i][1], day_list[i][2],
+                                                   day_list[i][3], day_list[i][4], day_list[i][5],
+                                                   day_list[i][6], day_list[i][7], day_list[i][8],
+                                                   day_list[i][9], day_list[i][10], day_list[i][11],
+                                                   day_list[i][12])
+            else:
+                print("日是最新")
+
             #15分钟线
-            lg = bs.login()
-            print('login respond error_code:' + lg.error_code)
-            print('login respond  error_msg:' + lg.error_msg)
-            rs = bs.query_history_k_data_plus(stock_code,
-                                              "date,time,code,open,high,low,close,volume,amount,adjustflag",
-                                              start_date=start_date, end_date=end_date,
-                                              frequency='15', adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
-            date_list = []
-            while (rs.error_code == '0') & rs.next():
-                # 获取一条记录，将记录合并在一起
-                date_list.append(rs.get_row_data())
-            for i in range(len(date_list)):
-                if i == 0:
-                    self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
-                                                  date_list[i][3], date_list[i][4], date_list[i][5],
-                                                  date_list[i][6], date_list[i][7], date_list[i][8],
-                                                  date_list[i][9], 0.0)
-                else:
-                    pctchg = round((float(date_list[i][6]) - float(date_list[i-1][6])) / float(date_list[i-1][6]) * 100.0, 6)
-                    self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
-                                                      date_list[i][3], date_list[i][4], date_list[i][5],
-                                                      date_list[i][6], date_list[i][7], date_list[i][8],
-                                                      date_list[i][9], pctchg)
-
-
-
-            # 30分钟线
-            lg = bs.login()
-            print('login respond error_code:' + lg.error_code)
-            print('login respond  error_msg:' + lg.error_msg)
-            rs = bs.query_history_k_data_plus(stock_code,
-                                              "date,time,code,open,high,low,close,volume,amount,adjustflag",
-                                              start_date=start_date, end_date=end_date,
-                                              frequency='30',
-                                              adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
-            date_list = []
-            while (rs.error_code == '0') & rs.next():
-                # 获取一条记录，将记录合并在一起
-                date_list.append(rs.get_row_data())
-            for i in range(len(date_list)):
-                if i == 0:
-                    self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
+            stock = self.sql.get_all_data_of_stock(name_15, start_date, end_date)
+            stock_dataframe = pd.DataFrame(stock)
+            last_date = stock_dataframe.tail(1).iloc[0, 0]
+            if last_date != end_date:
+                lg = bs.login()
+                print('login respond error_code:' + lg.error_code)
+                print('login respond  error_msg:' + lg.error_msg)
+                rs = bs.query_history_k_data_plus(stock_code,
+                                                  "date,time,code,open,high,low,close,volume,amount,adjustflag",
+                                                  start_date=last_date, end_date=end_date,
+                                                  frequency='15', adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+                date_list = []
+                while (rs.error_code == '0') & rs.next():
+                    # 获取一条记录，将记录合并在一起
+                    date_list.append(rs.get_row_data())
+                for i in range(len(date_list)):
+                    if i == 0:
+                        self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
                                                       date_list[i][3], date_list[i][4], date_list[i][5],
                                                       date_list[i][6], date_list[i][7], date_list[i][8],
                                                       date_list[i][9], 0.0)
-                else:
-                    pctchg = round((float(date_list[i][6]) - float(date_list[i - 1][6])) / float(date_list[i - 1][6]) * 100.0, 6)
-                    self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
-                                                      date_list[i][3], date_list[i][4], date_list[i][5],
-                                                      date_list[i][6], date_list[i][7], date_list[i][8],
-                                                      date_list[i][9], pctchg)
+                    else:
+                        pctchg = round((float(date_list[i][6]) - float(date_list[i-1][6])) / float(date_list[i-1][6]) * 100.0, 6)
+                        self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
+                                                          date_list[i][3], date_list[i][4], date_list[i][5],
+                                                          date_list[i][6], date_list[i][7], date_list[i][8],
+                                                          date_list[i][9], pctchg)
+            else:
+                print("15是最新")
+
+
+            # 30分钟线
+            stock = self.sql.get_all_data_of_stock(name_30, start_date, end_date)
+            stock_dataframe = pd.DataFrame(stock)
+            last_date = stock_dataframe.tail(1).iloc[0, 0]
+            if last_date != end_date:
+                lg = bs.login()
+                print('login respond error_code:' + lg.error_code)
+                print('login respond  error_msg:' + lg.error_msg)
+                rs = bs.query_history_k_data_plus(stock_code,
+                                                  "date,time,code,open,high,low,close,volume,amount,adjustflag",
+                                                  start_date=last_date, end_date=end_date,
+                                                  frequency='30',
+                                                  adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+                date_list = []
+                while (rs.error_code == '0') & rs.next():
+                    # 获取一条记录，将记录合并在一起
+                    date_list.append(rs.get_row_data())
+                for i in range(len(date_list)):
+                    if i == 0:
+                        self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
+                                                          date_list[i][3], date_list[i][4], date_list[i][5],
+                                                          date_list[i][6], date_list[i][7], date_list[i][8],
+                                                          date_list[i][9], 0.0)
+                    else:
+                        pctchg = round((float(date_list[i][6]) - float(date_list[i - 1][6])) / float(date_list[i - 1][6]) * 100.0, 6)
+                        self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
+                                                          date_list[i][3], date_list[i][4], date_list[i][5],
+                                                          date_list[i][6], date_list[i][7], date_list[i][8],
+                                                          date_list[i][9], pctchg)
+            else:
+                print("30是最新")
 
 
     def show_kd_line(self):
@@ -280,8 +300,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
         stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'j', 'k', 'l', 'm'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
-        stock_dataframe.set_index('Date', inplace=True)
         show_datas = stock_dataframe.tail(112)
+        show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
     def show_kkd_line(self):
@@ -289,17 +309,21 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_d'
-        # start_date = '2019-01-01'
-        # end_date = str(datetime.datetime.now().date())
-
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
-        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'ptcChg'])
-        stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
-        # stock_dataframe.set_index('Date', inplace=True)
 
-        # stock_dataframe = stock_dataframe.tail(112)  # 取尾部112个数据
-        show_datas_red = stock_dataframe[(stock_dataframe['ptcChg'] >= 0)].sort_values(by="Close", ascending=True)
-        show_datas_green = stock_dataframe[(stock_dataframe['ptcChg'] < 0)].sort_values(by="Close", ascending=False)
+        stock_dataframe = pd.DataFrame(stock)
+        abc = stock_dataframe.tail(1).iloc[0,0]
+        print("abc", type(abc), abc)
+
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg'])
+        stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
+
+
+
+
+
+        show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+        show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Open", ascending=False)
         show_datas = pd.concat([show_datas_red, show_datas_green] , axis=0)  #拼接
         # show_datas_red = show_datas[show_datas['ptcChg'] >= 0]
         # show_datas_red = show_datas_red.sort_values(by="Close", ascending=True)
@@ -323,11 +347,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         self.linearxg_LCDNumber.display(z[0])
         self.linearyg_LCDNumber.display(z[1])
 
-
-        # print("show_datas_red", len(show_datas_red), show_datas_red)
-        #
-        # print("vvvvvvvvvv", show_datas)
-
         # print(show_datas.sort_index(axis=1))
         #dataframe根据行索引进行降序排序（排序时默认升序，调节ascending参数
         # print(show_datas.sort_index(ascending=False))
@@ -339,36 +358,91 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
+    def show_kkkd_line(self):
+        start_date = self.start_date_edit.text()
+        end_date = self.end_date_edit.text()
+        stock_code = self.stock_code_lineEdit.text()
+        stock_code = 'k' + stock_code + '_d'
+        stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg'])
+        stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
+
+        show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
+        show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
+        show_datas = pd.concat([show_datas_red, show_datas_green] , axis=0)  #拼接
+
+        red_az =  show_datas_red['Close']
+        x = np.arange(0, len(red_az))
+        y = np.array(red_az)
+        z = np.polyfit(x, y, 1)
+        r = math.tan(z[0])
+        self.red_LCDNumber.display(r*100) #放大100倍 显示方便
+        self.linearxr_LCDNumber.display(z[0])
+        self.linearyr_LCDNumber.display(z[1])
+
+        green_az = show_datas_green['Close']
+        x = np.arange(0, len(green_az))
+        y = np.array(green_az)
+        z = np.polyfit(x, y, 1)
+        g = math.tan(abs(z[0]))
+        self.green_LCDNumber.display(g*100) #放大100倍 显示方便
+        self.linearxg_LCDNumber.display(z[0])
+        self.linearyg_LCDNumber.display(z[1])
+
+        #dataframe根据行索引进行降序排序（排序时默认升序，调节ascending参数
+        # print(show_datas.sort_index(ascending=False))
+        # show_datas = show_datas.sort_index(ascending=False)
+        # print("show_datas", show_datas[1:2])
+        # stock_dataframe.to_excel('data/SPY_20110701_20120630_Bollinger4.xlsx')
+        # print("dd", stock_dataframe[1])
+        # print("stock_dataframe2", stock_dataframe)
+        show_datas.set_index('Date', inplace=True)
+        self.dc.update_figure_k_line(show_datas)
 
     def show_k15_line(self):
-        stock_code = self.stock_code_lineEdit.text()
         start_date = '2019-01-01'
         end_date = str(datetime.datetime.now().date())
+        # start_date = self.start_date_edit.text()
+        # end_date = self.end_date_edit.text()
+        stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_15'
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
         stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
-        stock_dataframe.set_index('Date', inplace=True)
         show_datas = stock_dataframe.tail(112)
-        print("show_datas", show_datas)
+        show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
     def show_kk15_line(self):
+        start_date = self.start_date_edit.text()
+        end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
-        start_date = '2019-01-01'
-        end_date = str(datetime.datetime.now().date())
         stock_code = 'k' + stock_code + '_15'
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
         stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
-        stock_dataframe.set_index('Date', inplace=True)
-        show_datas = stock_dataframe.tail(112)
-
-        show_datas_red = show_datas[(show_datas['ptcChg'] >= 0)].sort_values(by="Close", ascending=True)
-        print("show_datas_red")
-        show_datas_green = show_datas[(show_datas['ptcChg'] < 0)].sort_values(by="Close", ascending=False)
+        show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+        show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Close", ascending=False)
         show_datas = pd.concat([show_datas_red, show_datas_green], axis=0)  # 拼接
-        print("dvdfdsd")
+        print("bbbvv")
+        red_az = show_datas_red['Close']
+        x = np.arange(0, len(red_az))
+        y = np.array(red_az)
+        z = np.polyfit(x, y, 1)
+        r = math.tan(z[0])
+        self.red_LCDNumber.display(r * 100)  # 放大100倍 显示方便
+        self.linearxr_LCDNumber.display(z[0])
+        self.linearyr_LCDNumber.display(z[1])
+
+        green_az = show_datas_green['Close']
+        x = np.arange(0, len(green_az))
+        y = np.array(green_az)
+        z = np.polyfit(x, y, 1)
+        g = math.tan(abs(z[0]))
+        self.green_LCDNumber.display(g * 100)  # 放大100倍 显示方便
+        self.linearxg_LCDNumber.display(z[0])
+        self.linearyg_LCDNumber.display(z[1])
+        show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
     def show_k30_line(self):

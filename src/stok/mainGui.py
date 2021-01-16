@@ -265,10 +265,10 @@ class Ui_MainWindow(object):
         adjustflag_label = QLabel("Adjustflag")
         self.start_date_edit = QDateTimeEdit()
         self.start_date_edit.setDisplayFormat("yyyy-MM-dd")
-        self.start_date_edit.setDate(QtCore.QDate(2021, 1, 1))  # 设置日期
+        self.start_date_edit.setDate(QtCore.QDate(2020, 1, 1))  # 设置日期
         self.end_date_edit = QDateTimeEdit()
         self.end_date_edit.setDisplayFormat("yyyy-MM-dd")
-        self.end_date_edit.setDate(QtCore.QDate(2021, 1, 22))  # 设置日期
+        self.end_date_edit.setDate(QtCore.QDate(2020, 1, 22))  # 设置日期
         # # 指定当前地日期为控件的日期，注意没有指定时间
         # dateEdit = QDateTimeEdit(QDate.currentDate(), self)
         # # 指定当前地时间为控件的时间，注意没有指定日期
@@ -349,8 +349,6 @@ class Ui_MainWindow(object):
         self.linearxg_LCDNumber = QLCDNumber()
         linearyg_Label = QLabel("gy")
         self.linearyg_LCDNumber = QLCDNumber()
-
-
         slope_GridLayout.addWidget(red_Label, 0, 0, 1, 1)
         slope_GridLayout.addWidget(self.red_LCDNumber, 0, 1, 1, 1)
         slope_GridLayout.addWidget(green_Label, 0, 2, 1, 1)
@@ -384,36 +382,39 @@ class Ui_MainWindow(object):
         self.period_widget = QWidget()
         period_button_Layout = QHBoxLayout()  # 水平布局 放置周期按钮
         self.period_widget.setLayout(period_button_Layout)
-        self.k5_buttion = QPushButton("5")
         self.k15_buttion = QPushButton("15")
         self.k30_buttion = QPushButton("30")
         self.k60_buttion = QPushButton("60")
         self.kd_buttion = QPushButton("日")
         self.kclear_buttion = QPushButton("空")
-        self.kk5_buttion = QPushButton("K5")
         self.kk15_buttion = QPushButton("K15")
         self.kk30_buttion = QPushButton("K30")
         self.kk60_buttion = QPushButton("K60")
         self.kkd_buttion = QPushButton("K日")
-        period_button_Layout.addWidget(self.k5_buttion)
+        self.kkk15_buttion = QPushButton("Kk15")
+        self.kkk30_buttion = QPushButton("Kk30")
+        self.kkk60_buttion = QPushButton("Kk60")
+        self.kkkd_buttion = QPushButton("Kk日")
         period_button_Layout.addWidget(self.k15_buttion)
         period_button_Layout.addWidget(self.k30_buttion)
         period_button_Layout.addWidget(self.k60_buttion)
         period_button_Layout.addWidget(self.kd_buttion)
-        period_button_Layout.addWidget(self.kclear_buttion)
-        period_button_Layout.addWidget(self.kk5_buttion)
         period_button_Layout.addWidget(self.kk15_buttion)
         period_button_Layout.addWidget(self.kk30_buttion)
         period_button_Layout.addWidget(self.kk60_buttion)
         period_button_Layout.addWidget(self.kkd_buttion)
-
+        period_button_Layout.addWidget(self.kkk15_buttion)
+        period_button_Layout.addWidget(self.kkk30_buttion)
+        period_button_Layout.addWidget(self.kkk60_buttion)
+        period_button_Layout.addWidget(self.kkkd_buttion)
+        period_button_Layout.addWidget(self.kclear_buttion)
         period_button_Layout.addStretch(1)  # 间距
 
         # KKKKK
         self.kline_widget = QWidget()
         receive_layout = QHBoxLayout()
         self.kline_widget.setLayout(receive_layout)
-        self.dc = MyMplCanvas(width=6, height=4, dpi=75)
+        self.dc = MyMplCanvas(width=8, height=5, dpi=80)
 
         # receive_layout.addWidget(self.dc)
         receive_layout.addWidget(self.dc)
