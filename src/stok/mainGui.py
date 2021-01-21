@@ -482,7 +482,7 @@ class Ui_MainWindow(object):
 
 
 
-        self.resize(1600, 800)
+        self.resize(1700, 800)
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
