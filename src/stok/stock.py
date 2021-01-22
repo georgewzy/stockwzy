@@ -451,7 +451,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
         r = math.degrees(z[0])
-        self.red_LCDNumber.display(r)  # 放大100倍 显示方便
+        self.redb_LCDNumber.display(r)  # 放大100倍 显示方便
         self.linearxr_LCDNumber.display(z[0])
         self.linearyr_LCDNumber.display(z[1])
 
@@ -460,7 +460,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
         g = math.degrees(abs(z[0]))
-        self.green_LCDNumber.display(g)  # 放大100倍 显示方便
+        self.greenb_LCDNumber.display(g)  # 放大100倍 显示方便
         self.linearxg_LCDNumber.display(z[0])
         self.linearyg_LCDNumber.display(z[1])
         show_datas.set_index('Date', inplace=True)
@@ -482,7 +482,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
 
     def clear_figure(self):
         print("show_figure")
-
         self.dc.update_figure_clear_k_line()
 
 
