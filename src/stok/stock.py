@@ -324,7 +324,9 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
-        r = math.degrees(z[0])
+        h = math.atan(z[0])
+        r = math.degrees(h)
+        print("nnnn", h, r)
         self.red_LCDNumber.display(r) #放大100倍 显示方便
         self.linearxr_LCDNumber.display(z[0])
         self.linearyr_LCDNumber.display(z[1])
@@ -333,7 +335,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
-        g = math.degrees((z[0]))
+        h = math.atan(z[0])
+        g = math.degrees(h)
         self.green_LCDNumber.display(g) #放大100倍 显示方便
         self.linearxg_LCDNumber.display(z[0])
         self.linearyg_LCDNumber.display(z[1])
@@ -363,14 +366,12 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas = pd.concat([show_datas_red, show_datas_green] , axis=0)  #拼接
 
         red_az =  show_datas_red['Volume']
-        print("dsdsdsd", red_az)
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
-        print("dsdsf", x, y)
         z = np.polyfit(x, y, 1)
-        print("sdszzzzz", z)
-        r = math.degrees(z[0])
-        print("dsdsf", r)
+        h = math.atan(z[0]/10000)
+        r = math.degrees(h)
+        print("dsdsf", h, r)
         self.redb_LCDNumber.display(r) #放大100倍 显示方便
         self.linearxr_LCDNumber.display(z[0])
         self.linearyr_LCDNumber.display(z[1])
@@ -379,7 +380,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
-        g = math.degrees(z[0])
+        h = math.atan(z[0]/10000)
+        g = math.degrees(h)
         self.greenb_LCDNumber.display(g) #放大100倍 显示方便
         self.linearxg_LCDNumber.display(z[0])
         self.linearyg_LCDNumber.display(z[1])
