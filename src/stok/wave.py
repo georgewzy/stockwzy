@@ -1,6 +1,7 @@
 
 
-import matplotlib as mpl
+
+import mplfinance as mpf
 import random
 import time
 import threading
@@ -16,52 +17,51 @@ import numpy as np
 from datetime import datetime
 from matplotlib.dates import  date2num, MinuteLocator, SecondLocator, DateFormatter
 
-import ComTool.borker as bk
+
 
 class MyMplCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.ax = self.fig.add_subplot(111)
-        self.__del__
+    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+
+    def __init__(self, parent=None, width=5, height=4, dpi=75):
+        #  style='charles'
+        # figsize=(width, height)
+        # dpi=dpi
+
+        self.fig = plt.figure(figsize=(width, height), dpi=dpi)
+        # self.fig = Figure(figsize=(width, height), dpi=dpi)
+        # self.axes1 = self.fig.add_subplot(111)
+
+        # self.axes1  = plt.subplot(211)
+        # self.axes2 = plt.subplot(212, sharex=self.axes1)
+        self.axes1 = self.fig.add_subplot(2, 1, 1)   # row = 2, col = 1, index = 1
+        self.axes2 = self.fig.add_subplot(2, 1, 2)    # row = 3, col = 1, index = 3
+        self.fig.subplots_adjust(bottom=0.2, wspace=0,hspace=0)
+        # self.fig.subplots_adjust(wspace=0, hspace=0)
+        #
+
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        print("444444444")
+
+        FigureCanvas.setSizePolicy(self,
+                                   QtWidgets.QSizePolicy.Expanding,
+                                   QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-        self.ax.set_xlabel("time of data generator")
-        self.ax.set_ylabel('random data value')
-        self.ax.legend()
-        self.ax.set_ylim(1, 100)
-        print("1111111111111")
-        xfmt = mdates.DateFormatter('%H:%M:%S')
-        # self.ax.xaxis.set_major_locator(MinuteLocator())  # every minute is a major locator
-        # self.ax.xaxis.set_minor_locator(SecondLocator([10, 20, 30, 40, 50]))  # every 10 second is a minor locator
-        self.ax.xaxis.set_major_formatter(xfmt)  # tick label formatter
-        self.curveObj = None  # draw object # draw object
 
-    def __del__(self):
-        pass
+    def update_figure_k_line(self, datas):
 
-    def plot(self, datax, datay):
-        if self.curveObj is None:
-            # create draw object once
-            self.curveObj, = self.ax.plot(np.array(datax), np.array(datay), 'r-')
-            print(self.curveObj)
-        else:
-            self.curveObj.set_data(np.array(datax), np.array(datay))
-            # update limit of X axis,to make sure it can move
-            self.ax.set_xlim(datax[0], datax[-1])
+        self.axes1.clear()
+        self.axes2.clear()
+
+
+        mpf.plot(datas, ax=self.axes1, volume=self.axes2, type='candle', style=sty, show_nontrading=False, tight_layout=False,scale_padding=0.15)
+        # self.axes1.xaxis_date()
+        # plt.xticks(rotation=30)
         self.draw()
 
-    def plotDate(self, datax, datay):
-        if self.curveObj is None:
-            # create draw object once
-            self.curveObj = self.ax.plot_date(np.array(datax), np.array(datay), 'r-')
-            print(self.curveObj)
-        else:
-            self.curveObj.set_data(np.array(datax), np.array(datay))
-            # update limit of X axis,to make sure it can move
-            self.ax.set_xlim(datax[0], datax[-1])
+    def update_figure_clear_k_line(self):
+        print("update_figure_clear")
+        self.axes1.clear()
+        self.axes2.clear()
         self.draw()
 
 
@@ -69,11 +69,11 @@ class Wave(QWidget):
 
     closed = pyqtSignal()
     updatedisTextRawSignal = pyqtSignal(str)
-    dataX= []
-    dataY= []
+
 
     def __init__(self,parent = None):
         super(Wave,self).__init__(parent)
+        print("1111111111111")
         self.init()
         self.initEvent()
         self.show()
@@ -87,42 +87,13 @@ class Wave(QWidget):
         self.setLayout(self.mainLayout)
         self.canvas = MyMplCanvas()
         self.mainLayout.addWidget(self.canvas)
-        self.initDataGenerator()
+
 
     def initEvent(self):
         self.updatedisTextRawSignal.connect(self.updateTextRaw)
 
-    def initDataGenerator(self):
-        self.tData = threading.Thread(name="dataGenerator", target=self.generateData)
-        self.tData.start()
 
-    def generateData(self):
-        counter = 0
-        while (True):
-            # newData = random.randint(1, 100)
-            queSize = bk.serailQueue.qsize()
 
-            if queSize != 0:
-                recvMsg = bk.serailQueue.get()
-
-                bs = str(recvMsg, encoding="utf8")
-                begin = bs.find('RPM=')
-                end = bs.find('\n\r')
-                print(int(bs[begin+4:end]))
-            newData = int(bs[begin+4:end])
-            newTime = date2num(datetime.now())
-
-            self.dataX.append(newTime)
-            self.dataY.append(newData)
-            self.canvas.plot(self.dataX, self.dataY)
-            # self.canvas.update_figure(self.dataX, self.dataY)
-            if counter >= 100:
-                self.dataX.pop(0)
-                self.dataY.pop(0)
-            else:
-                counter += 1
-
-            time.sleep(0.05)
 
     def closeEvent(self, event):
         self.closed.emit()
