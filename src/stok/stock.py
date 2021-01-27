@@ -110,18 +110,18 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         self.delete_optional_button.clicked.connect(self.delete_optional_stock_table)
         self.sync_stock_data_button.clicked.connect(self.sync_data)
         self.show_stock_data_button.clicked.connect(self.show_kd_line)
+        self.a15_buttion.clicked.connect(self.show_a15_line)
+        self.a30_buttion.clicked.connect(self.show_a30_line)
+        self.a60_buttion.clicked.connect(self.show_a30_line)
+        self.ad_buttion.clicked.connect(self.show_ad_line)
         self.k15_buttion.clicked.connect(self.show_k15_line)
         self.k30_buttion.clicked.connect(self.show_k30_line)
-        self.k60_buttion.clicked.connect(self.show_k30_line)
+        self.k60_buttion.clicked.connect(self.show_k15_line)
         self.kd_buttion.clicked.connect(self.show_kd_line)
         self.kk15_buttion.clicked.connect(self.show_kk15_line)
         self.kk30_buttion.clicked.connect(self.show_kk30_line)
         self.kk60_buttion.clicked.connect(self.show_kk15_line)
         self.kkd_buttion.clicked.connect(self.show_kkd_line)
-        self.kkk15_buttion.clicked.connect(self.show_kkk15_line)
-        self.kkk30_buttion.clicked.connect(self.show_kk30_line)
-        self.kkk60_buttion.clicked.connect(self.show_kk15_line)
-        self.kkkd_buttion.clicked.connect(self.show_kkkd_line)
         self.kclear_buttion.clicked.connect(self.clear_figure)
 
         self.errorSignal.connect(self.errorHint)
@@ -142,7 +142,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         mainObj = obj.arg
         # print("item changed:",mainObj.serialPortCombobox.currentText())
         self.serialPortCombobox.setToolTip(mainObj.serialPortCombobox.currentText())
-
 
     def insert_optional_stock_table(self):
         lg = bs.login()
@@ -168,13 +167,11 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_code = self.stock_code_lineEdit.text()
         self.sql.delete_stock('stock', stock_code)
 
-
     def display_optional_stock_table(self):
         res = self.sql.select_stock('stock')
         for i in range(len(res)):
             for j in range(len(res[i])):
                 self.optional_stock_model.setItem(i, j, QStandardItem(res[i][j]))
-
 
     def sync_data(self):
         # 创建表
@@ -205,7 +202,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
             # stock_dataframe = pd.DataFrame(stock)
             # last_date= stock_dataframe.tail(1).iloc[0,0]
             # print("last_datelast_date", last_date, end_date)
-            #
             # if last_date != end_date:
             lg = bs.login()
             print('login respond error_code:' + lg.error_code)
@@ -226,7 +222,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                                                day_list[i][6], day_list[i][7], day_list[i][8],
                                                day_list[i][9], day_list[i][10], day_list[i][11],
                                                day_list[i][12])
-
 
             #15分钟线
             # stock = self.sql.get_all_data_of_stock(name_15, start_date, end_date)
@@ -288,8 +283,12 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                                                       date_list[i][6], date_list[i][7], date_list[i][8],
                                                       date_list[i][9], pctchg)
 
+    def down_data(self):
+        t = threading.Thread(target=self.sync_data)
+        t.setDaemon(True)
+        t.start()
 
-    def show_kd_line(self):
+    def show_ad_line(self):
         stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_d'
         start_date = '2019-01-01'
@@ -301,7 +300,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
-    def show_kkd_line(self):
+
+    def show_kd_line(self):
         start_date = self.start_date_edit.text()
         end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
@@ -309,11 +309,16 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
 
         stock_dataframe = pd.DataFrame(stock)
-        abc = stock_dataframe.tail(1).iloc[0,0]
-        print("abc", type(abc), abc)
-
         stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
+
+        stock_az = stock_dataframe['Close']
+        x = np.arange(0, len(stock_az))
+        y = np.array(stock_az)
+        z = np.polyfit(x, y, 1)
+        h = math.atan(z[0])
+        r = math.degrees(h)
+        self.kline_LCDNumber.display(r)
 
         show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
         show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Close", ascending=False)
@@ -328,16 +333,14 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0])
         r = math.degrees(h)
-        print("nnnn", h, r)
-        self.red_LCDNumber.display(r) #放大100倍 显示方便
-
+        self.red_LCDNumber.display(r)
         green_az = show_datas_green['Close']
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0])
         g = math.degrees(h)
-        self.green_LCDNumber.display(g) #放大100倍 显示方便
+        self.green_LCDNumber.display(g)
 
         # print(show_datas.sort_index(axis=1))
         #dataframe根据行索引进行降序排序（排序时默认升序，调节ascending参数
@@ -350,7 +353,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
-    def show_kkkd_line(self):
+    def show_kkd_line(self):
         start_date = self.start_date_edit.text()
         end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
@@ -358,7 +361,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
         stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
-
         show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
         show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
         show_datas = pd.concat([show_datas_red, show_datas_green] , axis=0)  #拼接
@@ -369,8 +371,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0]/10000)
         r = math.degrees(h)
-        print("dsdsf", h, r)
-        self.redb_LCDNumber.display(r) #放大100倍 显示方便
+        self.redb_LCDNumber.display(r)
 
         green_az = show_datas_green['Volume']
         x = np.arange(0, len(green_az))
@@ -390,7 +391,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
-    def show_k15_line(self):
+    def show_a15_line(self):
         start_date = '2019-01-01'
         end_date = str(datetime.datetime.now().date())
         # start_date = self.start_date_edit.text()
@@ -404,7 +405,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
-    def show_kk15_line(self):
+    def show_k15_line(self):
         start_date = self.start_date_edit.text()
         end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
@@ -412,6 +413,15 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
         stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
+
+        stock_az = stock_dataframe['Close']
+        x = np.arange(0, len(stock_az))
+        y = np.array(stock_az)
+        z = np.polyfit(x, y, 1)
+        h = math.atan(z[0])
+        r = math.degrees(h)
+        self.klinev_LCDNumber.display(r)
+
         show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
         show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Close", ascending=False)
         show_datas = pd.concat([show_datas_red, show_datas_green], axis=0)  # 拼接
@@ -420,19 +430,18 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
         r = math.degrees(z[0])
-        self.red_LCDNumber.display(r)
+        self.redv_LCDNumber.display(r)
 
         green_az = show_datas_green['Close']
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
-        g = math.degrees(abs(z[0]))
-        self.green_LCDNumber.display(g)
-
+        g = math.degrees(z[0])
+        self.greenv_LCDNumber.display(g)
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
-    def show_kkk15_line(self):
+    def show_kk15_line(self):
         start_date = self.start_date_edit.text()
         end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
@@ -448,19 +457,19 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
         r = math.degrees(z[0])
-        self.redb_LCDNumber.display(r)  # 放大100倍 显示方便
+        self.redb_LCDNumber.display(r)
 
         green_az = show_datas_green['Volume']
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
-        g = math.degrees(abs(z[0]))
-        self.greenb_LCDNumber.display(g)  # 放大100倍 显示方便
+        g = math.degrees(z[0])
+        self.greenb_LCDNumber.display(g)
 
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
-    def show_k30_line(self):
+    def show_a30_line(self):
         stock_code = self.stock_code_lineEdit.text()
         start_date = '2019-01-01'
         end_date = str(datetime.datetime.now().date())
@@ -472,7 +481,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_dataframe.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
-    def show_kk30_line(self):
+    def show_k30_line(self):
         start_date = self.start_date_edit.text()
         end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
@@ -495,13 +504,13 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
-        g = math.degrees(abs(z[0]))
+        g = math.degrees(z[0])
         self.green_LCDNumber.display(g)
 
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
-    def show_kkk30_line(self):
+    def show_kk30_line(self):
         start_date = self.start_date_edit.text()
         end_date = self.end_date_edit.text()
         stock_code = self.stock_code_lineEdit.text()
@@ -524,7 +533,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
-        g = math.degrees(abs(z[0]))
+        g = math.degrees(z[0])
         self.greenb_LCDNumber.display(g)  # 放大100倍 显示方便
 
         show_datas.set_index('Date', inplace=True)
@@ -533,7 +542,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
     def clear_figure(self):
         print("show_figure")
         self.dc.update_figure_clear_k_line()
-
 
 
     def get_k15_history_data(self):

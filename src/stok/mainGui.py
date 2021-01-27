@@ -333,38 +333,34 @@ class Ui_MainWindow(object):
         # serial receive settings
         slope_GroupBox = QGroupBox("坡度")
         slope_GridLayout = QGridLayout()
+
+        kline_Label = QLabel("K")
+        self.kline_LCDNumber = QLCDNumber()
         red_Label = QLabel("R")
         self.red_LCDNumber = QLCDNumber()
         green_Label = QLabel("G")
         self.green_LCDNumber = QLCDNumber()
-        redb_Label = QLabel("RV")
-        self.redb_LCDNumber = QLCDNumber()
-        greenb_Label = QLabel("GV")
-        self.greenb_LCDNumber = QLCDNumber()
-        linearxr_Label = QLabel("rx")
-        self.linearxr_LCDNumber = QLCDNumber()
-        linearyr_Label = QLabel("ry")
-        self.linearyr_LCDNumber = QLCDNumber()
-        linearxg_Label = QLabel("gx")
-        self.linearxg_LCDNumber = QLCDNumber()
-        linearyg_Label = QLabel("gy")
-        self.linearyg_LCDNumber = QLCDNumber()
-        slope_GridLayout.addWidget(red_Label, 0, 0, 1, 1)
-        slope_GridLayout.addWidget(self.red_LCDNumber, 0, 1, 1, 1)
-        slope_GridLayout.addWidget(green_Label, 0, 2, 1, 1)
-        slope_GridLayout.addWidget(self.green_LCDNumber, 0, 3, 1, 1)
-        slope_GridLayout.addWidget(redb_Label, 1, 0, 1, 1)
-        slope_GridLayout.addWidget(self.redb_LCDNumber, 1, 1, 1, 1)
-        slope_GridLayout.addWidget(greenb_Label, 1, 2, 1, 1)
-        slope_GridLayout.addWidget(self.greenb_LCDNumber, 1, 3, 1, 1)
-        slope_GridLayout.addWidget(linearxr_Label, 2, 0, 1, 1)
-        slope_GridLayout.addWidget(self.linearxr_LCDNumber, 2, 1, 1, 1)
-        slope_GridLayout.addWidget(linearyr_Label, 2, 2, 1, 1)
-        slope_GridLayout.addWidget(self.linearyr_LCDNumber, 2, 3, 1, 1)
-        slope_GridLayout.addWidget(linearxg_Label, 3, 0, 1, 1)
-        slope_GridLayout.addWidget(self.linearxg_LCDNumber, 3, 1, 1, 1)
-        slope_GridLayout.addWidget(linearyg_Label, 3, 2, 1, 1)
-        slope_GridLayout.addWidget(self.linearyg_LCDNumber, 3, 3, 1, 1)
+
+        klinev_Label = QLabel("KV")
+        self.klinev_LCDNumber = QLCDNumber()
+        redv_Label = QLabel("RV")
+        self.redv_LCDNumber = QLCDNumber()
+        greenv_Label = QLabel("GV")
+        self.greenv_LCDNumber = QLCDNumber()
+
+        slope_GridLayout.addWidget(kline_Label, 0, 0, 1, 1)
+        slope_GridLayout.addWidget(self.kline_LCDNumber, 0, 1, 1, 1)
+        slope_GridLayout.addWidget(red_Label, 0, 2, 1, 1)
+        slope_GridLayout.addWidget(self.red_LCDNumber, 0, 3, 1, 1)
+        slope_GridLayout.addWidget(green_Label, 0, 4, 1, 1)
+        slope_GridLayout.addWidget(self.green_LCDNumber, 0, 5, 1, 1)
+        slope_GridLayout.addWidget(klinev_Label, 1, 0, 1, 1)
+        slope_GridLayout.addWidget(self.klinev_LCDNumber, 1, 1, 1, 1)
+        slope_GridLayout.addWidget(redv_Label, 1, 2, 1, 1)
+        slope_GridLayout.addWidget(self.redv_LCDNumber, 1, 3, 1, 1)
+        slope_GridLayout.addWidget(greenv_Label, 1, 4, 1, 1)
+        slope_GridLayout.addWidget(self.greenv_LCDNumber, 1, 5, 1, 1)
+
         slope_GroupBox.setLayout(slope_GridLayout)
         settingLayout.addWidget(slope_GroupBox)
 
@@ -378,37 +374,54 @@ class Ui_MainWindow(object):
         settingLayout.setStretch(2, 2)
         settingLayout.setStretch(4, 2)
 
+
+
         ########################## widgets receive and send area
         self.period_widget = QWidget()
         period_button_Layout = QHBoxLayout()  # 水平布局 放置周期按钮
-        self.period_widget.setLayout(period_button_Layout)
-        self.k15_buttion = QPushButton("15")
-        self.k30_buttion = QPushButton("30")
-        self.k60_buttion = QPushButton("60")
-        self.kd_buttion = QPushButton("日")
+        period_button_GridLayout = QGridLayout()
+        period_button_GridLayout.setContentsMargins(0, 0, 0, 0)
+        self.period_widget.setLayout(period_button_GridLayout)
         self.kclear_buttion = QPushButton("空")
-        self.kk15_buttion = QPushButton("K15")
-        self.kk30_buttion = QPushButton("K30")
-        self.kk60_buttion = QPushButton("K60")
-        self.kkd_buttion = QPushButton("K日")
-        self.kkk15_buttion = QPushButton("Kk15")
-        self.kkk30_buttion = QPushButton("Kk30")
-        self.kkk60_buttion = QPushButton("Kk60")
-        self.kkkd_buttion = QPushButton("Kk日")
-        period_button_Layout.addWidget(self.k15_buttion)
-        period_button_Layout.addWidget(self.k30_buttion)
-        period_button_Layout.addWidget(self.k60_buttion)
-        period_button_Layout.addWidget(self.kd_buttion)
-        period_button_Layout.addWidget(self.kk15_buttion)
-        period_button_Layout.addWidget(self.kk30_buttion)
-        period_button_Layout.addWidget(self.kk60_buttion)
-        period_button_Layout.addWidget(self.kkd_buttion)
-        period_button_Layout.addWidget(self.kkk15_buttion)
-        period_button_Layout.addWidget(self.kkk30_buttion)
-        period_button_Layout.addWidget(self.kkk60_buttion)
-        period_button_Layout.addWidget(self.kkkd_buttion)
-        period_button_Layout.addWidget(self.kclear_buttion)
-        period_button_Layout.addStretch(1)  # 间距
+        self.a15_buttion = QPushButton("15")
+        self.a30_buttion = QPushButton("30")
+        self.a60_buttion = QPushButton("60")
+        self.ad_buttion = QPushButton("日")
+        self.k15_buttion = QPushButton("K15")
+        self.k30_buttion = QPushButton("K30")
+        self.k60_buttion = QPushButton("K60")
+        self.kd_buttion = QPushButton("K日")
+        self.kk15_buttion = QPushButton("KK15")
+        self.kk30_buttion = QPushButton("KK30")
+        self.kk60_buttion = QPushButton("KK60")
+        self.kkd_buttion = QPushButton("KK日")
+        self.kkk15_buttion = QPushButton("KKk15")
+        self.kkk30_buttion = QPushButton("KKk30")
+        self.kkk60_buttion = QPushButton("KKk60")
+        self.kkkd_buttion = QPushButton("KkK日")
+
+        period_button_GridLayout.addWidget(self.a15_buttion, 0, 0, 1, 1)
+        period_button_GridLayout.addWidget(self.a30_buttion, 0, 1, 1, 1)
+        period_button_GridLayout.addWidget(self.a60_buttion, 0, 2, 1, 1)
+        period_button_GridLayout.addWidget(self.ad_buttion, 0, 3, 1, 1)
+        period_button_GridLayout.addWidget(self.k15_buttion, 0, 4, 1, 1)
+        period_button_GridLayout.addWidget(self.k30_buttion, 0, 5, 1, 1)
+        period_button_GridLayout.addWidget(self.k60_buttion, 0, 6, 1, 1)
+        period_button_GridLayout.addWidget(self.kd_buttion, 0, 7, 1, 1)
+        period_button_GridLayout.addWidget(self.kk15_buttion, 0, 8, 1, 1)
+        period_button_GridLayout.addWidget(self.kk30_buttion, 0, 9, 1, 1)
+        period_button_GridLayout.addWidget(self.kk60_buttion, 0, 10, 1, 1)
+        period_button_GridLayout.addWidget(self.kkd_buttion, 0, 11, 1, 1)
+        period_button_GridLayout.addWidget(self.kkk15_buttion, 1, 0, 1, 1)
+        period_button_GridLayout.addWidget(self.kkk30_buttion, 1, 1, 1, 1)
+        period_button_GridLayout.addWidget(self.kkk60_buttion, 1, 2, 1, 1)
+        period_button_GridLayout.addWidget(self.kkkd_buttion, 1, 3, 1, 1)
+
+        period_button_GridLayout.addWidget(self.kclear_buttion, 0, 16, 1, 1)
+
+        # period_button_GridLayout.addStretch(1)  # 间距
+
+
 
         # KKKKK
         self.kline_widget = QWidget()
@@ -418,7 +431,6 @@ class Ui_MainWindow(object):
 
         # receive_layout.addWidget(self.dc)
         receive_layout.addWidget(self.dc)
-
         # 表格
         self.model = QStandardItemModel(10, 18)
         # 设置水平方向四个头标签文本内容
@@ -459,9 +471,6 @@ class Ui_MainWindow(object):
         optional_list_Layout.addWidget(self.startButton)
 
 
-
-
-
         # main window
         self.statusBarStauts = QLabel()
         self.statusBarStauts.setMinimumWidth(80)
@@ -478,8 +487,6 @@ class Ui_MainWindow(object):
         self.statusBar().addWidget(self.statusBarReceiveCount,10)
         self.statusBar().addWidget(self.statusBarStauts,10)
         self.statusBar().addWidget(self.tcpBarStauts, 10)
-
-
 
 
         self.resize(1700, 800)
