@@ -163,9 +163,16 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_name = data_list[0][1]
         self.sql.insert_stock('stock', stock_code, stock_name)
 
+
     def delete_optional_stock_table(self):
         stock_code = self.stock_code_lineEdit.text()
+        name_day = 'k' + stock_code + '_d'
+        name_15 = 'k' + stock_code + '_15'
+        name_30 = 'k' + stock_code + '_30'
         self.sql.delete_stock('stock', stock_code)
+        self.sql.delete_table(name_day)
+        self.sql.delete_table(name_15)
+        self.sql.delete_table(name_30)
 
     def display_optional_stock_table(self):
         res = self.sql.select_stock('stock')
@@ -194,94 +201,108 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                 stock_code = 'sh.' + stock_code
             else:
                 stock_code = 'sz.' + stock_code
+            #对应的表
             name_day = 'k' + res[i][0] + '_d'
             name_15 = 'k' + res[i][0] + '_15'
             name_30 = 'k' + res[i][0] + '_30'
             #日线
-            # stock = self.sql.get_all_data_of_stock(name_day, start_date, end_date)
-            # stock_dataframe = pd.DataFrame(stock)
-            # last_date= stock_dataframe.tail(1).iloc[0,0]
-            # print("last_datelast_date", last_date, end_date)
-            # if last_date != end_date:
-            lg = bs.login()
-            print('login respond error_code:' + lg.error_code)
-            print('login respond  error_msg:' + lg.error_msg)
-            rd = bs.query_history_k_data_plus(stock_code,
-                                              "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,isST",
-                                              start_date=start_date, end_date=end_date,
-                                              frequency="d",
-                                              adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+            stock = self.sql.get_all_data_of_stock(name_day, start_date, end_date)
+            if stock == False or stock == []:
+                last_date = start_date
+            else:
+                stock_dataframe = pd.DataFrame(stock)
+                last_date = stock_dataframe.tail(1).iloc[0,0]
 
-            day_list = []
-            while (rd.error_code == '0') & rd.next():
-                # 获取一条记录，将记录合并在一起
-                day_list.append(rd.get_row_data())
-            for i in range(len(day_list)):
-                self.sql.insert_day_kline_data(name_day, day_list[i][0], day_list[i][1], day_list[i][2],
-                                               day_list[i][3], day_list[i][4], day_list[i][5],
-                                               day_list[i][6], day_list[i][7], day_list[i][8],
-                                               day_list[i][9], day_list[i][10], day_list[i][11],
-                                               day_list[i][12])
+            if last_date != end_date:
+                lg = bs.login()
+                rd = bs.query_history_k_data_plus(stock_code,
+                                                  "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,isST",
+                                                  start_date=last_date, end_date=end_date,
+                                                  frequency="d",
+                                                  adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+
+                day_list = []
+                while (rd.error_code == '0') & rd.next():
+                    # 获取一条记录，将记录合并在一起
+                    day_list.append(rd.get_row_data())
+                for i in range(len(day_list)):
+                    # if i == 0:
+                    #     self.sql.insert_day_kline_data(name_day, day_list[i][0], day_list[i][1], day_list[i][2],
+                    #                                    day_list[i][3], day_list[i][4], day_list[i][5],
+                    #                                    day_list[i][6], day_list[i][7], day_list[i][8],
+                    #                                    day_list[i][9], day_list[i][10], day_list[i][11],
+                    #                                    day_list[i][12])
+                    # else:
+                        # amplitude = round((float(date_list[i][3]) - float(date_list[i][4])) / float(date_list[i-1][5]) * 100.0, 6)  # 计算涨振幅
+                    self.sql.insert_day_kline_data(name_day, day_list[i][0], day_list[i][1], day_list[i][2],
+                                                   day_list[i][3], day_list[i][4], day_list[i][5],
+                                                   day_list[i][6], day_list[i][7], day_list[i][8],
+                                                   day_list[i][9], day_list[i][10], day_list[i][11],
+                                                   day_list[i][12])
 
             #15分钟线
-            # stock = self.sql.get_all_data_of_stock(name_15, start_date, end_date)
-            # stock_dataframe = pd.DataFrame(stock)
-            # last_date = stock_dataframe.tail(1).iloc[0, 0]
-            # if last_date != end_date:
-            lg = bs.login()
-            print('login respond error_code:' + lg.error_code)
-            print('login respond  error_msg:' + lg.error_msg)
-            rs = bs.query_history_k_data_plus(stock_code,
-                                              "date,time,code,open,high,low,close,volume,amount,adjustflag",
-                                              start_date=start_date, end_date=end_date,
-                                              frequency='15', adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
-            date_list = []
-            while (rs.error_code == '0') & rs.next():
-                # 获取一条记录，将记录合并在一起
-                date_list.append(rs.get_row_data())
-            for i in range(len(date_list)):
-                if i == 0:
-                    self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
-                                                  date_list[i][3], date_list[i][4], date_list[i][5],
-                                                  date_list[i][6], date_list[i][7], date_list[i][8],
-                                                  date_list[i][9], 0.0)
-                else:
-                    pctchg = round((float(date_list[i][6]) - float(date_list[i-1][6])) / float(date_list[i-1][6]) * 100.0, 6)
-                    self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
-                                                      date_list[i][3], date_list[i][4], date_list[i][5],
-                                                      date_list[i][6], date_list[i][7], date_list[i][8],
-                                                      date_list[i][9], pctchg)
-
-
-            # 30分钟线
-            # stock = self.sql.get_all_data_of_stock(name_30, start_date, end_date)
-            # stock_dataframe = pd.DataFrame(stock)
-            # last_date = stock_dataframe.tail(1).iloc[0, 0]
-            # if last_date != end_date:
-            lg = bs.login()
-            print('login respond error_code:' + lg.error_code)
-            print('login respond  error_msg:' + lg.error_msg)
-            rs = bs.query_history_k_data_plus(stock_code,
-                                              "date,time,code,open,high,low,close,volume,amount,adjustflag",
-                                              start_date=start_date, end_date=end_date,
-                                              frequency='30',
-                                              adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
-            date_list = []
-            while (rs.error_code == '0') & rs.next():
-                # 获取一条记录，将记录合并在一起
-                date_list.append(rs.get_row_data())
-            for i in range(len(date_list)):
-                if i == 0:
-                    self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
+            stock = self.sql.get_all_data_of_stock(name_15, start_date, end_date)
+            if stock == False or stock == []:
+                last_date = start_date
+            else:
+                stock_dataframe = pd.DataFrame(stock)
+                last_date = stock_dataframe.tail(1).iloc[0, 0]
+            if last_date != end_date:
+                lg = bs.login()
+                rs = bs.query_history_k_data_plus(stock_code,
+                                                  "date,time,code,open,high,low,close,volume,amount,adjustflag",
+                                                  start_date=last_date, end_date=end_date,
+                                                  frequency='15', adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+                date_list = []
+                while (rs.error_code == '0') & rs.next():
+                    # 获取一条记录，将记录合并在一起
+                    date_list.append(rs.get_row_data())
+                for i in range(len(date_list)):
+                    if i == 0:
+                        self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
                                                       date_list[i][3], date_list[i][4], date_list[i][5],
                                                       date_list[i][6], date_list[i][7], date_list[i][8],
                                                       date_list[i][9], 0.0)
-                else:
-                    pctchg = round((float(date_list[i][6]) - float(date_list[i - 1][6])) / float(date_list[i - 1][6]) * 100.0, 6)
-                    self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
-                                                      date_list[i][3], date_list[i][4], date_list[i][5],
-                                                      date_list[i][6], date_list[i][7], date_list[i][8],
-                                                      date_list[i][9], pctchg)
+                    else:
+                        amplitude = round((float(date_list[i][4]) - float(date_list[i][5])) / float(date_list[i - 1][6]) * 100.0, 6)  # 计算涨振幅
+                        pctchg = round((float(date_list[i][6]) - float(date_list[i-1][6])) / float(date_list[i-1][6]) * 100.0, 6)
+                        self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
+                                                          date_list[i][3], date_list[i][4], date_list[i][5],
+                                                          date_list[i][6], date_list[i][7], date_list[i][8],
+                                                          date_list[i][9], pctchg)
+
+
+            # 30分钟线
+            stock = self.sql.get_all_data_of_stock(name_30, start_date, end_date)
+            if stock == False or stock == []:
+                last_date = start_date
+            else:
+                stock_dataframe = pd.DataFrame(stock)
+                last_date = stock_dataframe.tail(1).iloc[0, 0]
+            if last_date != end_date:
+                lg = bs.login()
+                rs = bs.query_history_k_data_plus(stock_code,
+                                                  "date,time,code,open,high,low,close,volume,amount,adjustflag",
+                                                  start_date=last_date, end_date=end_date,
+                                                  frequency='30',
+                                                  adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+                date_list = []
+                while (rs.error_code == '0') & rs.next():
+                    # 获取一条记录，将记录合并在一起
+                    date_list.append(rs.get_row_data())
+                for i in range(len(date_list)):
+                    if i == 0:
+                        self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
+                                                          date_list[i][3], date_list[i][4], date_list[i][5],
+                                                          date_list[i][6], date_list[i][7], date_list[i][8],
+                                                          date_list[i][9], 0.0)
+                    else:
+                        amplitude = round((float(date_list[i][4]) - float(date_list[i][5])) / float(date_list[i - 1][6]) * 100.0, 6)  # 计算涨振幅
+                        pctchg = round((float(date_list[i][6]) - float(date_list[i - 1][6])) / float(date_list[i - 1][6]) * 100.0, 6) #计算涨跌幅
+                        self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
+                                                          date_list[i][3], date_list[i][4], date_list[i][5],
+                                                          date_list[i][6], date_list[i][7], date_list[i][8],
+                                                          date_list[i][9], pctchg)
 
     def down_data(self):
         t = threading.Thread(target=self.sync_data)
@@ -323,10 +344,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
         show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Close", ascending=False)
         show_datas = pd.concat([show_datas_red, show_datas_green] , axis=0)  #拼接
-        # show_datas_red = show_datas[show_datas['ptcChg'] >= 0]
-        # show_datas_red = show_datas_red.sort_values(by="Close", ascending=True)
-        # show_datas_green = show_datas[show_datas['ptcChg'] < 0]
-        # show_datas_green  = show_datas_green.sort_values(by="Close", ascending=False)
+
         red_az =  show_datas_red['Close']
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
@@ -342,14 +360,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         g = math.degrees(h)
         self.green_LCDNumber.display(g)
 
-        # print(show_datas.sort_index(axis=1))
-        #dataframe根据行索引进行降序排序（排序时默认升序，调节ascending参数
-        # print(show_datas.sort_index(ascending=False))
-        # show_datas = show_datas.sort_index(ascending=False)
-        # print("show_datas", show_datas[1:2])
-        # stock_dataframe.to_excel('data/SPY_20110701_20120630_Bollinger4.xlsx')
-        # print("dd", stock_dataframe[1])
-        # print("stock_dataframe2", stock_dataframe)
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
@@ -381,13 +391,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         g = math.degrees(h)
         self.greenb_LCDNumber.display(g)
 
-        #dataframe根据行索引进行降序排序（排序时默认升序，调节ascending参数
-        # print(show_datas.sort_index(ascending=False))
-        # show_datas = show_datas.sort_index(ascending=False)
-        # print("show_datas", show_datas[1:2])
-        # stock_dataframe.to_excel('data/SPY_20110701_20120630_Bollinger4.xlsx')
-        # print("dd", stock_dataframe[1])
-        # print("stock_dataframe2", stock_dataframe)
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 

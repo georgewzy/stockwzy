@@ -85,18 +85,19 @@ class SqliteHelper(object):
             print("get_all_data_of_stock successfully")
         except Exception as e:
             print("get_all_data_of_stock:{}".format(e))
+            res = False
         return res
 
 
     def delete_stock(self, table_name, stock_code):
         try:
             conn = self.connect_database()
-            cur = conn.cursor()
-            sql = '''DELETE from {} where stock_code={}'''.format(table_name, stock_code)
-            cur.execute(sql)
+            c = conn.cursor()
+            sql = '''DELETE from {} where stock_code=('{}')'''.format(table_name, stock_code)
+            c.execute(sql)
             conn.commit()
             conn.close()
-            print("deleteData successfully")
+            print("deleteData successfully", stock_code)
         except Exception as e:
             print("deleteData:{}".format(e))
 
@@ -223,7 +224,7 @@ class SqliteHelper(object):
 if __name__ == '__main__':
     sql = SqliteHelper()
     # sql.connect_database()
-    sql.create_stock_table('stock')
+    # sql.create_stock_table('stock')
     # sql.create_day_kline_table('d002789')
     # sql.create_minute_kline_table('f002789')
     # sql.create_k_day_table('kday_601600')
@@ -235,8 +236,10 @@ if __name__ == '__main__':
     # sql.insert_minute_kline_data('f002789', '2020-11-10', '20201110094500000',	'sz.002789',	17.8700000000,17.8800000000,17.6500000000,17.8500000000,206380,3662634.0000,2)
     # sp = sql.select_stock('d002789')
     # print(sp)
-    sa = sql.get_all_data_of_stock('k002789_d', '2020-01-01', '2020-12-08')
-    print(sa)
-    # sql.delete_stock_data('stock', '556')
+    # sa = sql.get_all_data_of_stock('k002463_d', '2020-01-01', '2020-12-08')
+    # if sa == []:
+    #     print("vvvvvvvvvv")
+    # print(sa)
+    sql.delete_stock('stock', "002789")
 
 
