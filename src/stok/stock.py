@@ -221,24 +221,25 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                                                   frequency="d",
                                                   adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
 
-                day_list = []
+                data_list = []
                 while (rd.error_code == '0') & rd.next():
                     # 获取一条记录，将记录合并在一起
-                    day_list.append(rd.get_row_data())
-                for i in range(len(day_list)):
-                    # if i == 0:
-                    #     self.sql.insert_day_kline_data(name_day, day_list[i][0], day_list[i][1], day_list[i][2],
-                    #                                    day_list[i][3], day_list[i][4], day_list[i][5],
-                    #                                    day_list[i][6], day_list[i][7], day_list[i][8],
-                    #                                    day_list[i][9], day_list[i][10], day_list[i][11],
-                    #                                    day_list[i][12])
-                    # else:
-                        # amplitude = round((float(date_list[i][3]) - float(date_list[i][4])) / float(date_list[i-1][5]) * 100.0, 6)  # 计算涨振幅
-                    self.sql.insert_day_kline_data(name_day, day_list[i][0], day_list[i][1], day_list[i][2],
-                                                   day_list[i][3], day_list[i][4], day_list[i][5],
-                                                   day_list[i][6], day_list[i][7], day_list[i][8],
-                                                   day_list[i][9], day_list[i][10], day_list[i][11],
-                                                   day_list[i][12])
+                    data_list.append(rd.get_row_data())
+                for i in range(len(data_list)):
+                    if i == 0:
+                        self.sql.insert_day_kline_data(name_day, data_list[i][0], data_list[i][1], data_list[i][2],
+                                                       data_list[i][3], data_list[i][4], data_list[i][5],
+                                                       data_list[i][6], data_list[i][7], data_list[i][8],
+                                                       data_list[i][9], data_list[i][10], data_list[i][11],
+                                                       data_list[i][12], 0.0, 0)
+                    else:
+                        amplitude = round((float(data_list[i][3]) - float(data_list[i][4])) / float(data_list[i-1][5]) * 100.0, 6)  # 计算价格振幅
+                        volumeChg =  round((float(data_list[i][7]) - float(data_list[i-1][7])) / float(data_list[i-1][7]) * 100.0, 6)  # 计算成交量涨幅
+                        self.sql.insert_day_kline_data(name_day, data_list[i][0], data_list[i][1], data_list[i][2],
+                                                       data_list[i][3], data_list[i][4], data_list[i][5],
+                                                       data_list[i][6], data_list[i][7], data_list[i][8],
+                                                       data_list[i][9], data_list[i][10], data_list[i][11],
+                                                       data_list[i][12], amplitude, volumeChg)
 
             #15分钟线
             stock = self.sql.get_all_data_of_stock(name_15, start_date, end_date)
@@ -253,23 +254,26 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                                                   "date,time,code,open,high,low,close,volume,amount,adjustflag",
                                                   start_date=last_date, end_date=end_date,
                                                   frequency='15', adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
-                date_list = []
+                data_list = []
                 while (rs.error_code == '0') & rs.next():
                     # 获取一条记录，将记录合并在一起
-                    date_list.append(rs.get_row_data())
-                for i in range(len(date_list)):
+                    data_list.append(rs.get_row_data())
+                for i in range(len(data_list)):
                     if i == 0:
-                        self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
-                                                      date_list[i][3], date_list[i][4], date_list[i][5],
-                                                      date_list[i][6], date_list[i][7], date_list[i][8],
-                                                      date_list[i][9], 0.0)
+                        self.sql.insert_minute_kline_data(name_15, data_list[i][0], data_list[i][1], data_list[i][2],
+                                                      data_list[i][3], data_list[i][4], data_list[i][5],
+                                                      data_list[i][6], data_list[i][7], data_list[i][8],
+                                                      data_list[i][9], 0.0, 0.0, 0)
                     else:
-                        amplitude = round((float(date_list[i][4]) - float(date_list[i][5])) / float(date_list[i - 1][6]) * 100.0, 6)  # 计算涨振幅
-                        pctchg = round((float(date_list[i][6]) - float(date_list[i-1][6])) / float(date_list[i-1][6]) * 100.0, 6)
-                        self.sql.insert_minute_kline_data(name_15, date_list[i][0], date_list[i][1], date_list[i][2],
-                                                          date_list[i][3], date_list[i][4], date_list[i][5],
-                                                          date_list[i][6], date_list[i][7], date_list[i][8],
-                                                          date_list[i][9], pctchg)
+                        amplitude = round((float(data_list[i][4]) - float(data_list[i][5])) / float(data_list[i - 1][6]) * 100.0, 6)  # 计算涨振幅
+                        pctchg = round((float(data_list[i][6]) - float(data_list[i-1][6])) / float(data_list[i-1][6]) * 100.0, 6)
+                        volumeChg = round((float(data_list[i][7]) - float(data_list[i-1][7])) / float(data_list[i-1][7]) * 100.0, 6)  # 计算成交量涨幅
+                        # volumeChg = 0.0
+                        print("data_list[i][1]", data_list[i][1])
+                        self.sql.insert_minute_kline_data(name_15, data_list[i][0], data_list[i][1], data_list[i][2],
+                                                          data_list[i][3], data_list[i][4], data_list[i][5],
+                                                          data_list[i][6], data_list[i][7], data_list[i][8],
+                                                          data_list[i][9], pctchg, amplitude, volumeChg)
 
 
             # 30分钟线
@@ -295,14 +299,15 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                         self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
                                                           date_list[i][3], date_list[i][4], date_list[i][5],
                                                           date_list[i][6], date_list[i][7], date_list[i][8],
-                                                          date_list[i][9], 0.0)
+                                                          date_list[i][9], 0.0, 0.0, 0)
                     else:
                         amplitude = round((float(date_list[i][4]) - float(date_list[i][5])) / float(date_list[i - 1][6]) * 100.0, 6)  # 计算涨振幅
                         pctchg = round((float(date_list[i][6]) - float(date_list[i - 1][6])) / float(date_list[i - 1][6]) * 100.0, 6) #计算涨跌幅
+                        volumeChg = round((float(data_list[i][7]) - float(data_list[i - 1][7])) / float(data_list[i - 1][7]) * 100.0, 6)  # 计算成交量涨幅
                         self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
                                                           date_list[i][3], date_list[i][4], date_list[i][5],
                                                           date_list[i][6], date_list[i][7], date_list[i][8],
-                                                          date_list[i][9], pctchg)
+                                                          date_list[i][9], pctchg, amplitude, volumeChg)
 
     def down_data(self):
         t = threading.Thread(target=self.sync_data)
@@ -315,7 +320,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         start_date = '2019-01-01'
         end_date = str(datetime.datetime.now().date())
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
-        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'j', 'k', 'l', 'm'])
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'j', 'k', 'l', 'm' 'n'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
         show_datas = stock_dataframe.tail(112)
         show_datas.set_index('Date', inplace=True)
@@ -330,7 +335,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
 
         stock_dataframe = pd.DataFrame(stock)
-        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg'])
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg', 'amplitude'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
 
         stock_az = stock_dataframe['Close']
@@ -344,22 +349,20 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
         show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Close", ascending=False)
         show_datas = pd.concat([show_datas_red, show_datas_green] , axis=0)  #拼接
-
-        red_az =  show_datas_red['Close']
+        red_az =  show_datas_red['pctChg']
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0])
         r = math.degrees(h)
         self.red_LCDNumber.display(r)
-        green_az = show_datas_green['Close']
+        green_az = show_datas_green['pctChg']
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0])
         g = math.degrees(h)
         self.green_LCDNumber.display(g)
-
         show_datas.set_index('Date', inplace=True)
         self.dc.update_figure_k_line(show_datas)
 
@@ -369,7 +372,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_d'
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
-        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg'])
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg', 'amplitude'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
         show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
         show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
@@ -402,7 +405,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_15'
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
-        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg'])
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg', 'amplitude'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
         show_datas = stock_dataframe.tail(112)
         show_datas.set_index('Date', inplace=True)
@@ -414,7 +417,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_15'
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
-        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg'])
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg', 'amplitude'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
 
         stock_az = stock_dataframe['Close']
@@ -450,7 +453,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_code = self.stock_code_lineEdit.text()
         stock_code = 'k' + stock_code + '_15'
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
-        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg'])
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg', 'amplitude'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
         show_datas_red = stock_dataframe[(stock_dataframe['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
         show_datas_green = stock_dataframe[(stock_dataframe['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
@@ -478,7 +481,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         end_date = str(datetime.datetime.now().date())
         stock_code = 'k' + stock_code + '_30'
         stock = self.sql.get_all_data_of_stock(stock_code, start_date, end_date)
-        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg'])
+        stock_dataframe = pd.DataFrame(stock, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg', 'amplitude'])
         stock_dataframe['Date'] = pd.to_datetime(stock_dataframe['Date'], format='%Y-%m-%d')
         show_datas = stock_dataframe.tail(112)
         stock_dataframe.set_index('Date', inplace=True)

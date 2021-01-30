@@ -121,7 +121,9 @@ class SqliteHelper(object):
                     adjustflag                  int,
                     turn                        float,
                     tradestatus                 int,
-                    pctChg                      float
+                    pctChg                      float,
+                    amplitude                   float,
+                    volumeChg                   bigint
                     )'''.format(table_name)
             cur.execute(sql)
             conn.commit()
@@ -130,20 +132,20 @@ class SqliteHelper(object):
         except Exception as e:
             print("Table created fail:{}".format(e))
 
-    def insert_day_kline_data(self, table_name, stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg):
+    def insert_day_kline_data(self, table_name, stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg, amplitude, volumeChg):
         try:
             conn = self.connect_database()
             cur = conn.cursor()
             sql = '''INSERT INTO {}
-                    (stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg) VALUES
-                    ( '{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
-                    )'''.format(table_name, stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg)
+                    (stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg, amplitude, volumeChg) VALUES
+                    ( '{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+                    )'''.format(table_name, stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg, amplitude, volumeChg)
             cur.execute(sql)
             conn.commit()
             conn.close()
-            print("insert_day_kline_data successfully", stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg)
+            print("insert_day_kline_data successfully", stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg, amplitude)
         except Exception as e:
-            print("insert_day_kline_data:{}".format(e), stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg)
+            print("insert_day_kline_data:{}".format(e), stock_date, stock_code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg, amplitude)
 
     # def select_data(self, table_name):
     #     try:
@@ -175,7 +177,9 @@ class SqliteHelper(object):
                     volume                      bigint,
                     amount                      bigint,
                     adjustflag                  int,
-                    pctChg                      float
+                    pctChg                      float,
+                    amplitude                   float,
+                    volumeChg                   bigint
                     )'''.format(table_name)
             cur.execute(sql)
             conn.commit()
@@ -184,20 +188,20 @@ class SqliteHelper(object):
         except Exception as e:
             print("create_minute_kline_table created fail:{}".format(e))
 
-    def insert_minute_kline_data(self, table_name, stock_date, stock_time, stock_code, open, high, low, close, volume, amount, adjustflag, pctChg):
+    def insert_minute_kline_data(self, table_name, stock_date, stock_time, stock_code, open, high, low, close, volume, amount, adjustflag, pctChg, amplitude, volumeChg):
         try:
             conn = self.connect_database()
             cur = conn.cursor()
             sql = '''INSERT INTO {}
-                    (stock_date, stock_time, stock_code, open, high, low, close, volume, amount,adjustflag, pctChg) VALUES
-                    ( '{}', '{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}
-                    )'''.format(table_name, stock_date, stock_time, stock_code, open, high, low, close, volume, amount, adjustflag, pctChg)
+                    (stock_date, stock_time, stock_code, open, high, low, close, volume, amount,adjustflag, pctChg, amplitude, volumeChg) VALUES
+                    ( '{}', '{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {} 
+                    )'''.format(table_name, stock_date, stock_time, stock_code, open, high, low, close, volume, amount, adjustflag, pctChg, amplitude, volumeChg)
             cur.execute(sql)
             conn.commit()
             conn.close()
-            print("insert_minute_kline_data successfully", stock_date, stock_time, stock_code, open, high, low, close, volume, amount, adjustflag, pctChg)
+            print("insert_minute_kline_data successfully", stock_date, stock_time, stock_code, open, high, low, close, volume, amount, adjustflag, pctChg, amplitude)
         except Exception as e:
-            print("insert_minute_kline_data:{}".format(e), stock_date, stock_time, stock_code, open, high, low, close, volume, amount, adjustflag, pctChg)
+            print("insert_minute_kline_data:{}".format(e), stock_date, stock_time, stock_code, open, high, low, close, volume, amount, adjustflag, pctChg, amplitude)
 
 
     def search_table(self, db_file='main.db'):
