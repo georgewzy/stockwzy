@@ -1,4 +1,4 @@
-import sys,os
+import sys, os
 
 import numpy as np
 import baostock as bs
@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib
 import mplfinance
 import random
+
 matplotlib.use('Qt5Agg')
 
 import matplotlib.pyplot  as plt
@@ -18,20 +19,20 @@ from matplotlib.figure import Figure
 # from matplotlib.dates import  date2num, MinuteLocator, SecondLocator, DateFormatter
 
 
-
 from stok import parameters, autoUpdate
 from stok.combobox import ComboBox
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import (QApplication, QWidget, QToolTip,QPushButton,QMessageBox,QDesktopWidget,QMainWindow,
-                             QVBoxLayout,QHBoxLayout,QGridLayout,QTextEdit,QLabel,QRadioButton,QCheckBox,
-                             QLineEdit,QGroupBox,QSplitter,QLCDNumber,QFileDialog,QMenuBar,QTableView,QDateTimeEdit,QHeaderView)
-from PyQt5.QtGui import QIcon,QFont,QTextCursor,QPixmap,QStandardItemModel,QStandardItem
+from PyQt5.QtWidgets import (QApplication, QWidget, QToolTip, QPushButton, QMessageBox, QDesktopWidget, QMainWindow,
+                             QVBoxLayout, QHBoxLayout, QGridLayout, QTextEdit, QLabel, QRadioButton, QCheckBox,
+                             QLineEdit, QGroupBox, QSplitter, QLCDNumber, QFileDialog, QMenuBar, QTableView,
+                             QDateTimeEdit, QHeaderView)
+from PyQt5.QtGui import QIcon, QFont, QTextCursor, QPixmap, QStandardItemModel, QStandardItem
 
 try:
-  import cPickle as pickle
+    import cPickle as pickle
 except ImportError:
-  import pickle
+    import pickle
 if sys.platform == "win32":
     import ctypes
 
@@ -53,8 +54,7 @@ kwargs = dict(
     ylabel_lower='Traded Volume',
     figratio=(5, 4),
     figscale=5
-    )
-
+)
 
 # 设置marketcolors
 # up:设置K线线柱颜色，up意为收盘价大于等于开盘价
@@ -64,26 +64,24 @@ kwargs = dict(
 # volume:成交量直方图的颜色
 # inherit:是否继承，选填
 mc = mpf.make_marketcolors(
-    up='red',       #上涨时为红色
-    down='green',   #下跌时为绿色
-    edge='black',   #隐藏K线边缘
-    wick='i',       #
-    volume='in',    #成交量用同样的颜色
+    up='red',  # 上涨时为红色
+    down='green',  # 下跌时为绿色
+    edge='black',  # 隐藏K线边缘
+    wick='i',  #
+    volume='in',  # 成交量用同样的颜色
     inherit=True
-    )
+)
 
 # 设置图形风格
 # gridaxis:设置网格线位置
 # gridstyle:设置网格线线型
 # y_on_right:设置y轴位置是否在右
 sty = mpf.make_mpf_style(
-    gridaxis='both',    #设置网格
-    gridstyle='-.',     #
-    y_on_right=True,   #
-    marketcolors=mc     #
-    )
-
-
+    gridaxis='both',  # 设置网格
+    gridstyle='-.',  #
+    y_on_right=True,  #
+    marketcolors=mc  #
+)
 
 
 class MyMplCanvas(FigureCanvas):
@@ -100,9 +98,10 @@ class MyMplCanvas(FigureCanvas):
 
         # self.axes1  = plt.subplot(211)
         # self.axes2 = plt.subplot(212, sharex=self.axes1)
-        self.axes1 = self.fig.add_subplot(2, 1, 1)   # row = 2, col = 1, index = 1
-        self.axes2 = self.fig.add_subplot(2, 1, 2)    # row = 3, col = 1, index = 3
-        self.fig.subplots_adjust(bottom=0.2, wspace=0,hspace=0)
+        self.axes1 = self.fig.add_subplot(3, 1, 1)  # row = 2, col = 1, index = 1
+        self.axes2 = self.fig.add_subplot(3, 1, 2)  # row = 3, col = 1, index = 3
+        self.axes3 = self.fig.add_subplot(3, 1, 3)  # row = 3, col = 1, index = 3
+        self.fig.subplots_adjust(bottom=0.2, wspace=0, hspace=0)
         # self.fig.subplots_adjust(wspace=0, hspace=0)
         #
 
@@ -126,10 +125,14 @@ class MyMplCanvas(FigureCanvas):
         # show_nontrading=False 去除非交易日
         # style=s
         # volume=True
-        mpf.plot(datas, ax=self.axes1, volume=self.axes2, type='candle', style=sty, show_nontrading=False, tight_layout=False,scale_padding=0.15)
+        mpf.plot(datas, ax=self.axes1, volume=self.axes2, type='candle', style=sty, show_nontrading=False,
+                 tight_layout=False, scale_padding=0.15)
         # self.axes1.xaxis_date()
         # plt.xticks(rotation=30)
         self.draw()
+
+    def update_figure_ex3(self, datas):
+        self.axes3.clear()
 
     def update_figure_clear_k_line(self):
         print("update_figure_clear")
@@ -138,14 +141,11 @@ class MyMplCanvas(FigureCanvas):
         self.draw()
 
 
-
-
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
 
     def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
-
 
     def update_figure_k(self):
         idf = pd.read_csv('data/SPY_20110701_20120630_Bollinger.csv', index_col=0, parse_dates=True)
@@ -158,9 +158,8 @@ class MyDynamicMplCanvas(MyMplCanvas):
         data = df.iloc[0:20]
         self.axes1.clear()
         self.axes2.clear()
-        mpf.plot(data, style=sty, type='candle', tight_layout=True,scale_padding=0.25)
+        mpf.plot(data, style=sty, type='candle', tight_layout=True, scale_padding=0.25)
         self.draw()
-
 
     def update_figure_k_line(self, datas):
         print("datas", datas)
@@ -174,7 +173,8 @@ class MyDynamicMplCanvas(MyMplCanvas):
         # show_nontrading=False 去除非交易日
         # style=s
         # volume=True
-        mpf.plot(datas, ax=self.axes1, volume=self.axes2, type='candle', style=sty, show_nontrading=False, tight_layout=False,scale_padding=0.15)
+        mpf.plot(datas, ax=self.axes1, volume=self.axes2, type='candle', style=sty, show_nontrading=False,
+                 tight_layout=False, scale_padding=0.15)
         # self.axes1.xaxis_date()
         # plt.xticks(rotation=30)
         self.draw()
@@ -192,18 +192,18 @@ class Ui_MainWindow(object):
         QToolTip.setFont(QFont('王中亚', 10))
         # main layout
         frameWidget = QWidget()
-        mainWidget = QSplitter(Qt.Horizontal)   #分隔符创建 主分隔符
-        frameLayout = QVBoxLayout()     #垂直布局（QVBoxLayout）
-        self.settingWidget = QWidget()   #
-        self.settingWidget.setProperty("class","settingWidget")
-        self.receiveSendWidget = QSplitter(Qt.Vertical)  #分隔符创建
-        self.functionalWiget = QWidget() #右边隐藏窗口
-        self.optional_stock_list_Wiget = QWidget() #右边窗口
+        mainWidget = QSplitter(Qt.Horizontal)  # 分隔符创建 主分隔符
+        frameLayout = QVBoxLayout()  # 垂直布局（QVBoxLayout）
+        self.settingWidget = QWidget()  #
+        self.settingWidget.setProperty("class", "settingWidget")
+        self.receiveSendWidget = QSplitter(Qt.Vertical)  # 分隔符创建
+        self.functionalWiget = QWidget()  # 右边隐藏窗口
+        self.optional_stock_list_Wiget = QWidget()  # 右边窗口
 
         # 创建三个垂直布局（QVBoxLayout）
-        settingLayout = QVBoxLayout()                   #最左侧
-        figure_Layout = QVBoxLayout()                   #中间件区域
-        optional_list_Layout = QVBoxLayout()             #右边
+        settingLayout = QVBoxLayout()  # 最左侧
+        figure_Layout = QVBoxLayout()  # 中间件区域
+        optional_list_Layout = QVBoxLayout()  # 右边
 
         self.settingWidget.setLayout(settingLayout)
         self.receiveSendWidget.setLayout(figure_Layout)
@@ -212,21 +212,20 @@ class Ui_MainWindow(object):
 
         # 创建主窗口
         mainLayout = QHBoxLayout()  # 水平布局（QHBoxLayout）
-        mainLayout.addWidget(self.settingWidget)    #嵌套布局
+        mainLayout.addWidget(self.settingWidget)  # 嵌套布局
         mainLayout.addWidget(self.receiveSendWidget)
         mainLayout.addWidget(self.optional_stock_list_Wiget)
         ## 参数1为索引,参数2为比例,单独设置一个位置的比例无效
-        mainLayout.setStretch(0 ,2)
-        mainLayout.setStretch(1 ,10)
-        mainLayout.setStretch(2 ,2)
-        mainLayout.setSpacing(0) ### 设置间距为0
-        menuLayout = QHBoxLayout()          # 水平布局
-        mainWidget.setLayout(mainLayout)    # 分隔符
-        frameLayout.addLayout(menuLayout)   #
-        frameLayout.addWidget(mainWidget)   #
+        mainLayout.setStretch(0, 2)
+        mainLayout.setStretch(1, 10)
+        mainLayout.setStretch(2, 2)
+        mainLayout.setSpacing(0)  ### 设置间距为0
+        menuLayout = QHBoxLayout()  # 水平布局
+        mainWidget.setLayout(mainLayout)  # 分隔符
+        frameLayout.addLayout(menuLayout)  #
+        frameLayout.addWidget(mainWidget)  #
         frameWidget.setLayout(frameLayout)  #
         self.setCentralWidget(frameWidget)  #
-
 
         # option layout
         self.settings_button = QPushButton()
@@ -253,22 +252,24 @@ class Ui_MainWindow(object):
         menuLayout.addStretch(100)
         menuLayout.addWidget(self.functional_button)
 
-
-
         # widgets serial settings
         stock_GroupBox = QGroupBox("条件")
         stock_statistics_GridLayout = QGridLayout()
         start_date_labek = QLabel("开始")
         end_date_label = QLabel("结束")
+        close_date_label = QLabel("close")
         stock_code_label = QLabel("编码")
         stock_period_label = QLabel("周期")
-        adjustflag_label = QLabel("Adjustflag")
+        adjustflag_label = QLabel("价格")
         self.start_date_edit = QDateTimeEdit()
         self.start_date_edit.setDisplayFormat("yyyy-MM-dd")
         self.start_date_edit.setDate(QtCore.QDate(2020, 1, 1))  # 设置日期
         self.end_date_edit = QDateTimeEdit()
         self.end_date_edit.setDisplayFormat("yyyy-MM-dd")
         self.end_date_edit.setDate(QtCore.QDate(2020, 1, 22))  # 设置日期
+        self.close_date_edit = QDateTimeEdit()
+        self.close_date_edit.setDisplayFormat("yyyy-MM-dd")
+        self.close_date_edit.setDate(QtCore.QDate(2020, 1, 22))  # 设置日期
         # # 指定当前地日期为控件的日期，注意没有指定时间
         # dateEdit = QDateTimeEdit(QDate.currentDate(), self)
         # # 指定当前地时间为控件的时间，注意没有指定日期
@@ -284,11 +285,13 @@ class Ui_MainWindow(object):
         self.time_period_combobox.setCurrentIndex(4)
         self.stock_code_lineEdit = QLineEdit()
         self.stock_code_lineEdit.setText("002789")
-        self.adjustflag_combobox = ComboBox()
-        self.adjustflag_combobox.addItem("1")
-        self.adjustflag_combobox.addItem("2")
-        self.adjustflag_combobox.addItem("3")
-        self.adjustflag_combobox.setCurrentIndex(1)
+        # self.adjustflag_combobox = ComboBox()
+        # self.adjustflag_combobox.addItem("1")
+        # self.adjustflag_combobox.addItem("2")
+        # self.adjustflag_combobox.addItem("3")
+        # self.adjustflag_combobox.setCurrentIndex(1)
+        self.adjustflag_LineEdit = QLineEdit()
+
         stock_statistics_GridLayout.addWidget(start_date_labek, 0, 0, 1, 1)
         stock_statistics_GridLayout.addWidget(self.start_date_edit, 0, 1, 1, 1)
         stock_statistics_GridLayout.addWidget(end_date_label, 1, 0)
@@ -297,13 +300,12 @@ class Ui_MainWindow(object):
         stock_statistics_GridLayout.addWidget(self.stock_code_lineEdit, 2, 1)
         stock_statistics_GridLayout.addWidget(stock_period_label, 3, 0)
         stock_statistics_GridLayout.addWidget(self.time_period_combobox, 3, 1)
-        stock_statistics_GridLayout.addWidget(adjustflag_label, 4, 0)
-        stock_statistics_GridLayout.addWidget(self.adjustflag_combobox, 4, 1)
-        # stock_statistics_layout.addWidget(self.show_stock_data_button, 8, 0, 1, 1)
-        # stock_statistics_layout.addWidget(self.figure_stock_data_button, 8, 1, 1, 1)
+        stock_statistics_GridLayout.addWidget(adjustflag_label, 4, 0, 1, 1)
+        stock_statistics_GridLayout.addWidget(self.adjustflag_LineEdit, 4, 1, 1, 1)
+        stock_statistics_GridLayout.addWidget(close_date_label, 5, 0, 1, 1)
+        stock_statistics_GridLayout.addWidget(self.close_date_edit, 5, 1, 1, 1)
         stock_GroupBox.setLayout(stock_statistics_GridLayout)
         settingLayout.addWidget(stock_GroupBox)
-
 
         button_GroupBox = QGroupBox("按键")
         button_GridLayout = QGridLayout()
@@ -334,19 +336,31 @@ class Ui_MainWindow(object):
         slope_GroupBox = QGroupBox("坡度")
         slope_GridLayout = QGridLayout()
 
-        kline_Label = QLabel("K")
+        kline_Label = QLabel("KD")
         self.kline_LCDNumber = QLCDNumber()
-        red_Label = QLabel("R")
+        red_Label = QLabel("RD")
         self.red_LCDNumber = QLCDNumber()
-        green_Label = QLabel("G")
+        green_Label = QLabel("GD")
         self.green_LCDNumber = QLCDNumber()
-
-        klinev_Label = QLabel("KV")
+        klinev_Label = QLabel("KDV")
         self.klinev_LCDNumber = QLCDNumber()
-        redv_Label = QLabel("RV")
+        redv_Label = QLabel("RDV")
         self.redv_LCDNumber = QLCDNumber()
-        greenv_Label = QLabel("GV")
+        greenv_Label = QLabel("GDV")
         self.greenv_LCDNumber = QLCDNumber()
+
+        k15line_Label = QLabel("K15")
+        self.k15line_LCDNumber = QLCDNumber()
+        red15_Label = QLabel("R15")
+        self.red15_LCDNumber = QLCDNumber()
+        green15_Label = QLabel("G15")
+        self.green15_LCDNumber = QLCDNumber()
+        k15linev_Label = QLabel("K15V")
+        self.k15linev_LCDNumber = QLCDNumber()
+        red15v_Label = QLabel("R15V")
+        self.red15v_LCDNumber = QLCDNumber()
+        green15v_Label = QLabel("G15V")
+        self.green15v_LCDNumber = QLCDNumber()
 
         slope_GridLayout.addWidget(kline_Label, 0, 0, 1, 1)
         slope_GridLayout.addWidget(self.kline_LCDNumber, 0, 1, 1, 1)
@@ -361,6 +375,19 @@ class Ui_MainWindow(object):
         slope_GridLayout.addWidget(greenv_Label, 1, 4, 1, 1)
         slope_GridLayout.addWidget(self.greenv_LCDNumber, 1, 5, 1, 1)
 
+        slope_GridLayout.addWidget(k15line_Label, 2, 0, 1, 1)
+        slope_GridLayout.addWidget(self.k15line_LCDNumber, 2, 1, 1, 1)
+        slope_GridLayout.addWidget(red15_Label, 2, 2, 1, 1)
+        slope_GridLayout.addWidget(self.red15_LCDNumber, 2, 3, 1, 1)
+        slope_GridLayout.addWidget(green15_Label, 2, 4, 1, 1)
+        slope_GridLayout.addWidget(self.green15_LCDNumber, 2, 5, 1, 1)
+        slope_GridLayout.addWidget(k15linev_Label, 3, 0, 1, 1)
+        slope_GridLayout.addWidget(self.k15linev_LCDNumber, 3, 1, 1, 1)
+        slope_GridLayout.addWidget(red15v_Label, 3, 2, 1, 1)
+        slope_GridLayout.addWidget(self.red15v_LCDNumber, 3, 3, 1, 1)
+        slope_GridLayout.addWidget(green15v_Label, 3, 4, 1, 1)
+        slope_GridLayout.addWidget(self.green15v_LCDNumber, 3, 5, 1, 1)
+
         slope_GroupBox.setLayout(slope_GridLayout)
         settingLayout.addWidget(slope_GroupBox)
 
@@ -374,15 +401,14 @@ class Ui_MainWindow(object):
         settingLayout.setStretch(2, 2)
         settingLayout.setStretch(4, 2)
 
-
-
         ########################## widgets receive and send area
         self.period_widget = QWidget()
         period_button_Layout = QHBoxLayout()  # 水平布局 放置周期按钮
         period_button_GridLayout = QGridLayout()
         period_button_GridLayout.setContentsMargins(0, 0, 0, 0)
         self.period_widget.setLayout(period_button_GridLayout)
-        self.kclear_buttion = QPushButton("空")
+        self.kclear_buttion = QPushButton("KC")
+        self.kshow_buttion = QPushButton("KS")
         self.a15_buttion = QPushButton("15")
         self.a30_buttion = QPushButton("30")
         self.a60_buttion = QPushButton("60")
@@ -400,6 +426,7 @@ class Ui_MainWindow(object):
         self.kkk60_buttion = QPushButton("KKk60")
         self.kkkd_buttion = QPushButton("KkK日")
 
+        period_button_GridLayout.addWidget(self.kclear_buttion, 0, 16, 1, 1)
         period_button_GridLayout.addWidget(self.a15_buttion, 0, 0, 1, 1)
         period_button_GridLayout.addWidget(self.a30_buttion, 0, 1, 1, 1)
         period_button_GridLayout.addWidget(self.a60_buttion, 0, 2, 1, 1)
@@ -416,12 +443,10 @@ class Ui_MainWindow(object):
         period_button_GridLayout.addWidget(self.kkk30_buttion, 1, 1, 1, 1)
         period_button_GridLayout.addWidget(self.kkk60_buttion, 1, 2, 1, 1)
         period_button_GridLayout.addWidget(self.kkkd_buttion, 1, 3, 1, 1)
+        period_button_GridLayout.addWidget(self.kshow_buttion, 1, 4, 1, 1)
 
-        period_button_GridLayout.addWidget(self.kclear_buttion, 0, 16, 1, 1)
 
         # period_button_GridLayout.addStretch(1)  # 间距
-
-
 
         # KKKKK
         self.kline_widget = QWidget()
@@ -452,9 +477,6 @@ class Ui_MainWindow(object):
         figure_Layout.setStretch(1, 12)  # 中间宽度
         figure_Layout.setStretch(2, 4)  # 下边宽度
 
-
-
-
         ####### 右边
         self.optional_stock_model = QStandardItemModel(1, 2)
         # 设置水平方向四个头标签文本内容
@@ -470,24 +492,22 @@ class Ui_MainWindow(object):
         optional_list_Layout.addWidget(self.optional_stock_tableview)
         optional_list_Layout.addWidget(self.startButton)
 
-
         # main window
         self.statusBarStauts = QLabel()
         self.statusBarStauts.setMinimumWidth(80)
-        self.statusBarStauts.setText("<font color=%s>%s</font>" %("#008200", parameters.strReady))
+        self.statusBarStauts.setText("<font color=%s>%s</font>" % ("#008200", parameters.strReady))
 
         self.tcpBarStauts = QLabel()
         self.tcpBarStauts.setMinimumWidth(80)
         self.tcpBarStauts.setText("<font color=%s>%s</font>" % ("#008200", "TCP"))
 
-        self.statusBarSendCount = QLabel(parameters.strSend+"(bytes): "+"0")
-        self.statusBarReceiveCount = QLabel(parameters.strReceive+"(bytes): "+"0")
+        self.statusBarSendCount = QLabel(parameters.strSend + "(bytes): " + "0")
+        self.statusBarReceiveCount = QLabel(parameters.strReceive + "(bytes): " + "0")
 
-        self.statusBar().addWidget(self.statusBarSendCount,3)
-        self.statusBar().addWidget(self.statusBarReceiveCount,10)
-        self.statusBar().addWidget(self.statusBarStauts,10)
+        self.statusBar().addWidget(self.statusBarSendCount, 3)
+        self.statusBar().addWidget(self.statusBarReceiveCount, 10)
+        self.statusBar().addWidget(self.statusBarStauts, 10)
         self.statusBar().addWidget(self.tcpBarStauts, 10)
-
 
         self.resize(1700, 800)
         qr = self.frameGeometry()
@@ -498,11 +518,11 @@ class Ui_MainWindow(object):
         # self.setWindowTitle(COMTool.parameters.appName+" V"+str(helpAbout.versionMajor)+"."+str(helpAbout.versionMinor))
         icon = QIcon()
 
-        #print("icon path:"+self.DataPath+"/"+parameters.appIcon)
-        #icon.addPixmap(QPixmap(self.DataPath+"/"+parameters.appIcon), QIcon.Normal, QIcon.Off)
+        # print("icon path:"+self.DataPath+"/"+parameters.appIcon)
+        # icon.addPixmap(QPixmap(self.DataPath+"/"+parameters.appIcon), QIcon.Normal, QIcon.Off)
         icon.addPixmap(QPixmap(parameters.appIcon), QIcon.Normal, QIcon.Off)
 
-        self.setWindowIcon(icon) #设置icon
+        self.setWindowIcon(icon)  # 设置icon
         self.setWindowTitle('测试')
 
         if sys.platform == "win32":

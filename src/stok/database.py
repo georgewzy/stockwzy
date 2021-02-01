@@ -88,6 +88,21 @@ class SqliteHelper(object):
             res = False
         return res
 
+    def get_data_by_date(self, table_name, date):
+        try:
+            conn = self.connect_database()
+            c = conn.cursor()
+            # sql = '''SELECT * from {} where stock_code = 'sz.002789' '''.format(table_name)
+            sql = '''SELECT * from {} where stock_date = '{}' '''.format(table_name, date)
+            cur = c.execute(sql)
+            res = cur.fetchall()
+            conn.commit()
+            conn.close()
+            print("get_data_by_date successfully")
+        except Exception as e:
+            print("get_data_by_date:{}".format(e))
+            res = False
+        return res
 
     def delete_stock(self, table_name, stock_code):
         try:
@@ -123,7 +138,7 @@ class SqliteHelper(object):
                     tradestatus                 int,
                     pctChg                      float,
                     amplitude                   float,
-                    volumeChg                   bigint
+                    volumeChg                   float
                     )'''.format(table_name)
             cur.execute(sql)
             conn.commit()
@@ -179,7 +194,7 @@ class SqliteHelper(object):
                     adjustflag                  int,
                     pctChg                      float,
                     amplitude                   float,
-                    volumeChg                   bigint
+                    volumeChg                   float
                     )'''.format(table_name)
             cur.execute(sql)
             conn.commit()
@@ -245,5 +260,8 @@ if __name__ == '__main__':
     #     print("vvvvvvvvvv")
     # print(sa)
     sql.delete_stock('stock', "002789")
+
+    sa = sql.get_data_by_date('k002789_d', '2020-01-03')
+    print(sa)
 
 
