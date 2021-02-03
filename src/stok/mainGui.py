@@ -133,6 +133,7 @@ class MyMplCanvas(FigureCanvas):
 
     def update_figure_ex3(self, datas):
         self.axes3.clear()
+        # mpf.plot()
 
     def update_figure_clear_k_line(self):
         print("update_figure_clear")
@@ -409,6 +410,7 @@ class Ui_MainWindow(object):
         self.period_widget.setLayout(period_button_GridLayout)
         self.kclear_buttion = QPushButton("KC")
         self.kshow_buttion = QPushButton("KS")
+        self.kall_buttion = QPushButton("KA")
         self.a15_buttion = QPushButton("15")
         self.a30_buttion = QPushButton("30")
         self.a60_buttion = QPushButton("60")
@@ -444,7 +446,7 @@ class Ui_MainWindow(object):
         period_button_GridLayout.addWidget(self.kkk60_buttion, 1, 2, 1, 1)
         period_button_GridLayout.addWidget(self.kkkd_buttion, 1, 3, 1, 1)
         period_button_GridLayout.addWidget(self.kshow_buttion, 1, 4, 1, 1)
-
+        period_button_GridLayout.addWidget(self.kall_buttion, 1, 5, 1, 1)
 
         # period_button_GridLayout.addStretch(1)  # 间距
 

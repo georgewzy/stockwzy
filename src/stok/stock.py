@@ -124,6 +124,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         self.kkd_buttion.clicked.connect(self.show_kkd_line)
         self.kclear_buttion.clicked.connect(self.clear_figure)
         self.kshow_buttion.clicked.connect(self.show_ks_line)
+        self.kall_buttion.clicked.connect(self.show_ka_line)
 
         self.errorSignal.connect(self.errorHint)
         self.showSerialComboboxSignal.connect(self.showCombobox)
@@ -582,10 +583,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_kd = self.sql.get_all_data_of_stock(stock_code_kd, start_date, end_date)
         stock_k15 = self.sql.get_all_data_of_stock(stock_code_k15, start_date, end_date)
 
-
         stock_dataframe_kd = pd.DataFrame(stock_kd, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg', 'amplitude', 'volumeChg'])
         stock_dataframe_k15 = pd.DataFrame(stock_k15, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg', 'amplitude', 'volumeChg'])
-
         show_datas_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
         show_datas_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
 
@@ -634,7 +633,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         h = math.atan(z[0])
         g = math.degrees(h)
         self.greenv_LCDNumber.display(g)
-
 
         show_datas_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
         show_datas_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Close", ascending=False)
@@ -686,8 +684,124 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         self.green15v_LCDNumber.display(g)
 
 
+    def show_ka_line(self):
+        start_date = self.start_date_edit.text()
+        # end_date = self.end_date_edit.text()
+        end_date = str(datetime.datetime.now().date())
+        stock_code = self.stock_code_lineEdit.text()
+        stock_code_kd = 'k' + stock_code + '_d'
+        stock_code_k15 = 'k' + stock_code + '_15'
+        stock_code_k30 = 'k' + stock_code + '_30'
+        stock_kd = self.sql.get_all_data_of_stock(stock_code_kd, start_date, end_date)
+        stock_k15 = self.sql.get_all_data_of_stock(stock_code_k15, start_date, end_date)
 
+        stock_dataframe_kd = pd.DataFrame(stock_kd, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg', 'amplitude', 'volumeChg'])
+        stock_dataframe_k15 = pd.DataFrame(stock_k15, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg', 'amplitude', 'volumeChg'])
 
+        print(stock_dataframe_kd)
+        print("ddsds")
+        print(stock_dataframe_kd.head(1))
+        print(type(len(stock_dataframe_kd)), len(stock_dataframe_kd))
+        for i in range(len(stock_dataframe_kd)):
+            print("i", i)
+
+        # show_datas_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+        # show_datas_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
+        #
+        # stock_az = stock_dataframe_kd['Close']
+        # x = np.arange(0, len(stock_az))
+        # y = np.array(stock_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # r = math.degrees(h)
+        # self.kline_LCDNumber.display(r)
+        # red_az = show_datas_red['pctChg']
+        # x = np.arange(0, len(red_az))
+        # y = np.array(red_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # r = math.degrees(h)
+        # self.red_LCDNumber.display(r)
+        # green_az = show_datas_green['pctChg']
+        # x = np.arange(0, len(green_az))
+        # y = np.array(green_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # g = math.degrees(h)
+        # self.green_LCDNumber.display(g)
+        #
+        # show_datas_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
+        # show_datas_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
+        # stock_az = stock_dataframe_kd['volumeChg']
+        # x = np.arange(0, len(stock_az))
+        # y = np.array(stock_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # r = math.degrees(h)
+        # self.klinev_LCDNumber.display(r)
+        # red_az = show_datas_red['volumeChg']
+        # x = np.arange(0, len(red_az))
+        # y = np.array(red_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # r = math.degrees(h)
+        # self.redv_LCDNumber.display(r)
+        # green_az = show_datas_green['volumeChg']
+        # x = np.arange(0, len(green_az))
+        # y = np.array(green_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # g = math.degrees(h)
+        # self.greenv_LCDNumber.display(g)
+        #
+        # show_datas_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+        # show_datas_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Close", ascending=False)
+        # stock_az = stock_dataframe_k15['Close']
+        # x = np.arange(0, len(stock_az))
+        # y = np.array(stock_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # r = math.degrees(h)
+        # self.k15line_LCDNumber.display(r)
+        # red_az = show_datas_red['Close']
+        # x = np.arange(0, len(red_az))
+        # y = np.array(red_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # r = math.degrees(h)
+        # self.red15_LCDNumber.display(r)
+        # green_az = show_datas_green['Close']
+        # x = np.arange(0, len(green_az))
+        # y = np.array(green_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # g = math.degrees(h)
+        # self.green15_LCDNumber.display(g)
+        #
+        # show_datas_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
+        # show_datas_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
+        # stock_az = stock_dataframe_k15['Volume']
+        # x = np.arange(0, len(stock_az))
+        # y = np.array(stock_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # r = math.degrees(h)
+        # self.k15linev_LCDNumber.display(r)
+        # red_az = show_datas_red['volumeChg']
+        # x = np.arange(0, len(red_az))
+        # y = np.array(red_az)
+        # z = np.polyfit(x, y, 1)
+        # print("z[0]z[0]", z[0])
+        # h = math.atan(z[0])
+        # r = math.degrees(h)
+        # self.red15v_LCDNumber.display(r)
+        # green_az = show_datas_green['volumeChg']
+        # x = np.arange(0, len(green_az))
+        # y = np.array(green_az)
+        # z = np.polyfit(x, y, 1)
+        # h = math.atan(z[0])
+        # g = math.degrees(h)
+        # self.green15v_LCDNumber.display(g)
 
     def clear_figure(self):
         print("show_figure")
