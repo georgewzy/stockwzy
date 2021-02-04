@@ -174,10 +174,8 @@ class MyDynamicMplCanvas(MyMplCanvas):
         # show_nontrading=False 去除非交易日
         # style=s
         # volume=True
-        mpf.plot(datas, ax=self.axes1, volume=self.axes2, type='candle', style=sty, show_nontrading=False,
-                 tight_layout=False, scale_padding=0.15)
-        # self.axes1.xaxis_date()
-        # plt.xticks(rotation=30)
+        mpf.plot(datas)
+
         self.draw()
 
     def update_figure_clear_k_line(self):
@@ -410,6 +408,7 @@ class Ui_MainWindow(object):
         self.period_widget.setLayout(period_button_GridLayout)
         self.kclear_buttion = QPushButton("KC")
         self.kshow_buttion = QPushButton("KS")
+        self.ktest_buttion = QPushButton("KT")
         self.kall_buttion = QPushButton("KA")
         self.a15_buttion = QPushButton("15")
         self.a30_buttion = QPushButton("30")
@@ -447,7 +446,7 @@ class Ui_MainWindow(object):
         period_button_GridLayout.addWidget(self.kkkd_buttion, 1, 3, 1, 1)
         period_button_GridLayout.addWidget(self.kshow_buttion, 1, 4, 1, 1)
         period_button_GridLayout.addWidget(self.kall_buttion, 1, 5, 1, 1)
-
+        period_button_GridLayout.addWidget(self.ktest_buttion, 1, 6, 1, 1)
         # period_button_GridLayout.addStretch(1)  # 间距
 
         # KKKKK

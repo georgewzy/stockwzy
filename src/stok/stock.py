@@ -125,6 +125,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         self.kclear_buttion.clicked.connect(self.clear_figure)
         self.kshow_buttion.clicked.connect(self.show_ks_line)
         self.kall_buttion.clicked.connect(self.show_ka_line)
+        self.ktest_buttion.clicked.connect(self.show_kt_line)
 
         self.errorSignal.connect(self.errorHint)
         self.showSerialComboboxSignal.connect(self.showCombobox)
@@ -182,6 +183,70 @@ class SerialComm(QMainWindow, Ui_MainWindow):
             for j in range(len(res[i])):
                 self.optional_stock_model.setItem(i, j, QStandardItem(res[i][j]))
 
+    def show_kt_line(self):
+        # 创建表
+        res = self.sql.select_stock('stock')
+        for i in range(len(res)):
+            name_day = 'k' + res[i][0] + '_d'
+            name_15 = 'k' + res[i][0] + '_15'
+            name_30 = 'k' + res[i][0] + '_30'
+            self.sql.create_day_kline_table(name_day)
+            self.sql.create_minute_kline_table(name_15)
+            self.sql.create_minute_kline_table(name_30)
+
+        start_date = '2020-07-23'
+        end_date = str(datetime.datetime.now().date())
+        # 更新数据
+        res = self.sql.select_stock('stock')
+        for i in range(len(res)):
+            stock_code = res[i][0]
+            if stock_code[0] == '6':
+                stock_code = 'sh.' + stock_code
+            else:
+                stock_code = 'sz.' + stock_code
+            #对应的表
+            name_day = 'k' + res[i][0] + '_d'
+            name_15 = 'k' + res[i][0] + '_15'
+            name_30 = 'k' + res[i][0] + '_30'
+            #日线
+
+            lg = bs.login()
+            rd = bs.query_history_k_data_plus(stock_code,
+                                              "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,isST",
+                                              start_date=start_date, end_date=end_date,
+                                              frequency="d",
+                                              adjustflag="2")  # frequency="d"取日k线，adjustflag="3"默认不复权
+
+            data_list = []
+            while (rd.error_code == '0') & rd.next():
+                # 获取一条记录，将记录合并在一起
+                data_list.append(rd.get_row_data())
+            print("data_list", data_list)
+
+            for i in range(len(data_list)):
+                if i == 0:
+                    self.sql.insert_day_kline_data(name_day, data_list[i][0], data_list[i][1], data_list[i][2],
+                                                   data_list[i][3], data_list[i][4], data_list[i][5],
+                                                   data_list[i][6], data_list[i][7], data_list[i][8],
+                                                   data_list[i][9], data_list[i][10], data_list[i][11],
+                                                   data_list[i][12], 0.0, 0.0)
+                else:
+                    amplitude = round((float(data_list[i][3]) - float(data_list[i][4])) / float(data_list[i-1][5]) * 100.0, 6)  # 计算价格振幅
+
+                    # volumeChg =  round((float(data_list[i][7]) - float(data_list[i-1][7])) / float(data_list[i-1][7]) * 100.0, 6)  # 计算成交量涨幅
+                    if float(data_list[i - 1][7]) == 0.0:
+                        volumeChg = 0.0
+                    else:
+                        volumeChg = round((float(data_list[i][7]) - float(data_list[i-1][7])) / float(data_list[i-1][7]) * 100.0, 6)  # 计算成交量涨幅
+                    # volumeChg = 0.0
+                    self.sql.insert_day_kline_data(name_day, data_list[i][0], data_list[i][1], data_list[i][2],
+                                                   data_list[i][3], data_list[i][4], data_list[i][5],
+                                                   data_list[i][6], data_list[i][7], data_list[i][8],
+                                                   data_list[i][9], data_list[i][10], data_list[i][11],
+                                                   data_list[i][12], amplitude, volumeChg)
+
+
+
     def sync_data(self):
         # 创建表
         res = self.sql.select_stock('stock')
@@ -236,7 +301,11 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                                                        data_list[i][12], 0.0, 0)
                     else:
                         amplitude = round((float(data_list[i][3]) - float(data_list[i][4])) / float(data_list[i-1][5]) * 100.0, 6)  # 计算价格振幅
-                        volumeChg =  round((float(data_list[i][7]) - float(data_list[i-1][7])) / float(data_list[i-1][7]) * 100.0, 6)  # 计算成交量涨幅
+                        # volumeChg =  round((float(data_list[i][7]) - float(data_list[i-1][7])) / float(data_list[i-1][7]) * 100.0, 6)  # 计算成交量涨幅
+                        if float(data_list[i-1][7]) == 0.0:
+                            volumeChg = 0.0
+                        else:
+                            volumeChg = round((float(data_list[i][7]) - float(data_list[i-1][7])) / float(data_list[i-1][7]) * 100.0, 6)  # 计算成交量涨幅
                         self.sql.insert_day_kline_data(name_day, data_list[i][0], data_list[i][1], data_list[i][2],
                                                        data_list[i][3], data_list[i][4], data_list[i][5],
                                                        data_list[i][6], data_list[i][7], data_list[i][8],
@@ -269,10 +338,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                     else:
                         amplitude = round((float(data_list[i][4]) - float(data_list[i][5])) / float(data_list[i - 1][6]) * 100.0, 6)  # 计算涨振幅
                         pctchg = round((float(data_list[i][6]) - float(data_list[i-1][6])) / float(data_list[i-1][6]) * 100.0, 6)
-                        print("data_list[i][1]", data_list[i][1])
-                        print("data_list[i-1][7]", data_list[i-1][7])
-                        print("data_list[i][7]",  data_list[i][7])
-
                         if float(data_list[i-1][7]) == 0.0:
                             volumeChg = 0.0
                         else:
@@ -308,12 +373,12 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                                                           date_list[i][6], date_list[i][7], date_list[i][8],
                                                           date_list[i][9], 0.0, 0.0, 0)
                     else:
-                        amplitude = round((float(date_list[i][4]) - float(date_list[i][5])) / float(date_list[i - 1][6]) * 100.0, 6)  # 计算涨振幅
-                        pctchg = round((float(date_list[i][6]) - float(date_list[i - 1][6])) / float(date_list[i - 1][6]) * 100.0, 6) #计算涨跌幅
-                        if float(data_list[i - 1][7]) == 0.0:
+                        amplitude = round((float(date_list[i][4]) - float(date_list[i][5])) / float(date_list[i-1][6]) * 100.0, 6)  # 计算涨振幅
+                        pctchg = round((float(date_list[i][6]) - float(date_list[i - 1][6])) / float(date_list[i-1][6]) * 100.0, 6) #计算涨跌幅
+                        if float(data_list[i-1][7]) == 0.0:
                             volumeChg = 0.0
                         else:
-                            volumeChg = round((float(data_list[i][7]) - float(data_list[i - 1][7])) / float(data_list[i - 1][7]) * 100.0, 6)  # 计算成交量涨幅
+                            volumeChg = round((float(data_list[i][7]) - float(data_list[i-1][7])) / float(data_list[i-1][7]) * 100.0, 6)  # 计算成交量涨幅
                         self.sql.insert_minute_kline_data(name_30, date_list[i][0], date_list[i][1], date_list[i][2],
                                                           date_list[i][3], date_list[i][4], date_list[i][5],
                                                           date_list[i][6], date_list[i][7], date_list[i][8],
@@ -698,38 +763,28 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         stock_dataframe_kd = pd.DataFrame(stock_kd, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg', 'amplitude', 'volumeChg'])
         stock_dataframe_k15 = pd.DataFrame(stock_k15, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg', 'amplitude', 'volumeChg'])
 
-        print(stock_dataframe_kd)
-        print("ddsds")
-        print(stock_dataframe_kd.head(1))
-        print(type(len(stock_dataframe_kd)), len(stock_dataframe_kd))
         for i in range(len(stock_dataframe_kd)):
             print("i", i)
+            stock_dataframe_kd = stock_dataframe_kd.head(i)
 
-        # show_datas_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
-        # show_datas_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
-        #
-        # stock_az = stock_dataframe_kd['Close']
-        # x = np.arange(0, len(stock_az))
-        # y = np.array(stock_az)
-        # z = np.polyfit(x, y, 1)
-        # h = math.atan(z[0])
-        # r = math.degrees(h)
-        # self.kline_LCDNumber.display(r)
-        # red_az = show_datas_red['pctChg']
-        # x = np.arange(0, len(red_az))
-        # y = np.array(red_az)
-        # z = np.polyfit(x, y, 1)
-        # h = math.atan(z[0])
-        # r = math.degrees(h)
-        # self.red_LCDNumber.display(r)
-        # green_az = show_datas_green['pctChg']
-        # x = np.arange(0, len(green_az))
-        # y = np.array(green_az)
-        # z = np.polyfit(x, y, 1)
-        # h = math.atan(z[0])
-        # g = math.degrees(h)
-        # self.green_LCDNumber.display(g)
-        #
+            show_datas_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+            show_datas_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
+
+            red_az = show_datas_red['pctChg']
+            x = np.arange(0, len(red_az))
+            y = np.array(red_az)
+            z = np.polyfit(x, y, 1)
+            h = math.atan(z[0])
+            r = math.degrees(h)
+            self.red_LCDNumber.display(r)
+            green_az = show_datas_green['pctChg']
+            x = np.arange(0, len(green_az))
+            y = np.array(green_az)
+            z = np.polyfit(x, y, 1)
+            h = math.atan(z[0])
+            g = math.degrees(h)
+            self.green_LCDNumber.display(g)
+
         # show_datas_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
         # show_datas_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
         # stock_az = stock_dataframe_kd['volumeChg']
