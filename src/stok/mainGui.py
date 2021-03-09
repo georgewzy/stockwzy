@@ -98,9 +98,9 @@ class MyMplCanvas(FigureCanvas):
 
         # self.axes1  = plt.subplot(211)
         # self.axes2 = plt.subplot(212, sharex=self.axes1)
-        self.axes1 = self.fig.add_subplot(3, 1, 1)  # row = 2, col = 1, index = 1
-        self.axes2 = self.fig.add_subplot(3, 1, 2)  # row = 3, col = 1, index = 3
-        self.axes3 = self.fig.add_subplot(3, 1, 3)  # row = 3, col = 1, index = 3
+        self.axes1 = self.fig.add_subplot(3, 1, 1)      # row = 2, col = 1, index = 1
+        self.axes2 = self.fig.add_subplot(3, 1, 2)      # row = 3, col = 1, index = 3
+        self.axes3 = self.fig.add_subplot(3, 1, 3)      # row = 3, col = 1, index = 3
         self.fig.subplots_adjust(bottom=0.2, wspace=0, hspace=0)
         # self.fig.subplots_adjust(wspace=0, hspace=0)
         #
@@ -131,9 +131,17 @@ class MyMplCanvas(FigureCanvas):
         # plt.xticks(rotation=30)
         self.draw()
 
-    def update_figure_ex3(self, datas):
+    def update_figure_ex3(self, rd, gd, rdv, gdv):
         self.axes3.clear()
-        # mpf.plot()
+        x = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        y = [23, 21, 32, 13, 3, 132, 13, 3, 1]
+        xaxis = np.arange(0, len(rd))
+        self.axes3.plot(xaxis, rd, color='r')
+        self.axes3.plot(xaxis, gd, color='g')
+        # self.axes3.plot(xaxis, rdv, color='b')
+        # self.axes3.plot(xaxis, gdv, color='y')
+        self.draw()
+
 
     def update_figure_clear_k_line(self):
         print("update_figure_clear")
@@ -175,7 +183,6 @@ class MyDynamicMplCanvas(MyMplCanvas):
         # style=s
         # volume=True
         mpf.plot(datas)
-
         self.draw()
 
     def update_figure_clear_k_line(self):
@@ -262,13 +269,13 @@ class Ui_MainWindow(object):
         adjustflag_label = QLabel("价格")
         self.start_date_edit = QDateTimeEdit()
         self.start_date_edit.setDisplayFormat("yyyy-MM-dd")
-        self.start_date_edit.setDate(QtCore.QDate(2020, 1, 1))  # 设置日期
+        self.start_date_edit.setDate(QtCore.QDate(2021, 1, 1))  # 设置日期
         self.end_date_edit = QDateTimeEdit()
         self.end_date_edit.setDisplayFormat("yyyy-MM-dd")
-        self.end_date_edit.setDate(QtCore.QDate(2020, 1, 22))  # 设置日期
+        self.end_date_edit.setDate(QtCore.QDate(2021, 3, 8))  # 设置日期
         self.close_date_edit = QDateTimeEdit()
         self.close_date_edit.setDisplayFormat("yyyy-MM-dd")
-        self.close_date_edit.setDate(QtCore.QDate(2020, 1, 22))  # 设置日期
+        self.close_date_edit.setDate(QtCore.QDate(2021, 1, 22))  # 设置日期
         # # 指定当前地日期为控件的日期，注意没有指定时间
         # dateEdit = QDateTimeEdit(QDate.currentDate(), self)
         # # 指定当前地时间为控件的时间，注意没有指定日期
