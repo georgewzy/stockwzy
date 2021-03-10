@@ -648,8 +648,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
 
         stock_dataframe_kd = pd.DataFrame(stock_kd, columns=['Date', 'Code', 'Open', 'High', 'Low', 'Close', 'Preclose', 'Volume', 'Amount', 'Adjustflag', 'turn', 'tradestatus', 'pctChg', 'amplitude', 'volumeChg'])
         stock_dataframe_k15 = pd.DataFrame(stock_k15, columns=['Date', 'Time', 'Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'adjustflag', 'pctChg', 'amplitude', 'volumeChg'])
-        show_datas_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
-        show_datas_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
+        show_datas_kd_close_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+        show_datas_kd_close_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
 
         stock_az = stock_dataframe_kd['Close']
         x = np.arange(0, len(stock_az))
@@ -658,14 +658,14 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         h = math.atan(z[0])
         r = math.degrees(h)
         self.kline_LCDNumber.display(r)
-        red_az = show_datas_red['pctChg']
+        red_az = show_datas_kd_close_red['pctChg']
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0])
         r = math.degrees(h)
         self.red_LCDNumber.display(r)
-        green_az = show_datas_green['pctChg']
+        green_az = show_datas_kd_close_green['pctChg']
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
@@ -673,32 +673,36 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         g = math.degrees(h)
         self.green_LCDNumber.display(g)
 
-        show_datas_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
-        show_datas_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
+        show_datas_kd_volume_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
+        show_datas_kd_volume_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
         stock_az = stock_dataframe_kd['volumeChg']
+        print("stock_az", stock_az)
         x = np.arange(0, len(stock_az))
         y = np.array(stock_az)
         z = np.polyfit(x, y, 1)
+        print("bb", x, y)
         h = math.atan(z[0])
         r = math.degrees(h)
         self.klinev_LCDNumber.display(r)
-        red_az = show_datas_red['volumeChg']
+        red_az = show_datas_kd_volume_red['volumeChg']
+
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0])
         r = math.degrees(h)
         self.redv_LCDNumber.display(r)
-        green_az = show_datas_green['volumeChg']
+        green_az = show_datas_kd_volume_green['volumeChg']
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
+        print("ww", x, y)
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0])
         g = math.degrees(h)
         self.greenv_LCDNumber.display(g)
 
-        show_datas_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
-        show_datas_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Close", ascending=False)
+        show_datas_k15_close_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+        show_datas_k15_close_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Close", ascending=False)
         stock_az = stock_dataframe_k15['Close']
         x = np.arange(0, len(stock_az))
         y = np.array(stock_az)
@@ -706,14 +710,14 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         h = math.atan(z[0])
         r = math.degrees(h)
         self.k15line_LCDNumber.display(r)
-        red_az = show_datas_red['Close']
+        red_az = show_datas_k15_close_red['Close']
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
         h = math.atan(z[0])
         r = math.degrees(h)
         self.red15_LCDNumber.display(r)
-        green_az = show_datas_green['Close']
+        green_az = show_datas_k15_close_green['Close']
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
@@ -721,8 +725,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         g = math.degrees(h)
         self.green15_LCDNumber.display(g)
 
-        show_datas_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
-        show_datas_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
+        show_datas_k15_volume_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
+        show_datas_k15_volume_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
         stock_az = stock_dataframe_k15['Volume']
         x = np.arange(0, len(stock_az))
         y = np.array(stock_az)
@@ -730,7 +734,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         h = math.atan(z[0])
         r = math.degrees(h)
         self.k15linev_LCDNumber.display(r)
-        red_az = show_datas_red['volumeChg']
+        red_az = show_datas_k15_volume_red['volumeChg']
         x = np.arange(0, len(red_az))
         y = np.array(red_az)
         z = np.polyfit(x, y, 1)
@@ -738,7 +742,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         h = math.atan(z[0])
         r = math.degrees(h)
         self.red15v_LCDNumber.display(r)
-        green_az = show_datas_green['volumeChg']
+        green_az = show_datas_k15_volume_green['volumeChg']
         x = np.arange(0, len(green_az))
         y = np.array(green_az)
         z = np.polyfit(x, y, 1)
@@ -775,12 +779,11 @@ class SerialComm(QMainWindow, Ui_MainWindow):
 
         for i in range(len(stock_dataframe_kd)):
             stock_dataframe_tmp_kd = stock_dataframe_kd.head(i)
+            show_datas_kd_close_red = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+            show_datas_kd_close_green = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
 
-            show_datas_red = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
-            show_datas_green = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
-
-            red_az = show_datas_red['pctChg']
-            green_az = show_datas_green['pctChg']
+            red_az = show_datas_kd_close_red['pctChg']
+            green_az = show_datas_kd_close_green['pctChg']
             x = np.arange(0, len(red_az))
             y = np.array(red_az)
             if np.size(x) >= 2:
@@ -800,10 +803,10 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                 g = 0
             gd.append(g)
 
-            show_datas_red = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
-            show_datas_green = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
-            red_az = show_datas_red['volumeChg']
-            green_az = show_datas_green['volumeChg']
+            show_datas_kd_volume_red = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
+            show_datas_kd_volume_green = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
+            red_az = show_datas_kd_volume_red['volumeChg']
+            green_az = show_datas_kd_volume_green['volumeChg']
             print("green_az", green_az)
             x = np.arange(0, len(red_az))
             y = np.array(red_az)
