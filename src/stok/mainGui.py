@@ -138,8 +138,8 @@ class MyMplCanvas(FigureCanvas):
         xaxis = np.arange(0, len(rd))
         self.axes3.plot(xaxis, rd, color='r')
         self.axes3.plot(xaxis, gd, color='g')
-        # self.axes3.plot(xaxis, rdv, color='b')
-        # self.axes3.plot(xaxis, gdv, color='y')
+        self.axes3.plot(xaxis, rdv, color='b')
+        self.axes3.plot(xaxis, gdv, color='y')
         self.draw()
 
 

@@ -651,7 +651,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
         show_datas_kd_close_red = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
         show_datas_kd_close_green = stock_dataframe_kd[(stock_dataframe_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
 
-        stock_az = stock_dataframe_kd['Close']
+        stock_az = stock_dataframe_kd['pctChg']
         x = np.arange(0, len(stock_az))
         y = np.array(stock_az)
         z = np.polyfit(x, y, 1)
@@ -782,6 +782,13 @@ class SerialComm(QMainWindow, Ui_MainWindow):
             show_datas_kd_close_red = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
             show_datas_kd_close_green = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
 
+            stock_az = stock_dataframe_tmp_kd['pctChg']
+            x = np.arange(0, len(stock_az))
+            y = np.array(stock_az)
+            z = np.polyfit(x, y, 1)
+            h = math.atan(z[0])
+            r = math.degrees(h)
+
             red_az = show_datas_kd_close_red['pctChg']
             green_az = show_datas_kd_close_green['pctChg']
             x = np.arange(0, len(red_az))
@@ -826,7 +833,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                 g = math.degrees(h)
             else:
                 g = 0
-            gdv.append(g)
+            gdv.append(abs(g))
 
         self.dc.update_figure_ex3(rd, gd, rdv, gdv)
             # show_datas_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
