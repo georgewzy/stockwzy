@@ -727,7 +727,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
 
         show_datas_k15_volume_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
         show_datas_k15_volume_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
-        stock_az = stock_dataframe_k15['Volume']
+        stock_az = stock_dataframe_k15['volumeChg']
         x = np.arange(0, len(stock_az))
         y = np.array(stock_az)
         z = np.polyfit(x, y, 1)
@@ -785,9 +785,13 @@ class SerialComm(QMainWindow, Ui_MainWindow):
             stock_az = stock_dataframe_tmp_kd['pctChg']
             x = np.arange(0, len(stock_az))
             y = np.array(stock_az)
-            z = np.polyfit(x, y, 1)
-            h = math.atan(z[0])
-            r = math.degrees(h)
+            if np.size(x) >= 2:
+                z = np.polyfit(x, y, 1)
+                h = math.atan(z[0])
+                n = math.degrees(h)
+            else:
+                n = 0
+
 
             red_az = show_datas_kd_close_red['pctChg']
             green_az = show_datas_kd_close_green['pctChg']
@@ -1295,8 +1299,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                 pctchg_yin = pctchg_yin + float(data_list[i][12])
 
 
-        pctchg_amplitude = round(pctchg_yang + abs(pctchg_yin), 2)  # 振幅
-        volume_average = round(volume_total / 100 / pctchg_amplitude)  # 平均
+        pctchg_amplitude = round(pctchg_yang + abs(pctchg_yin), 2)          # 振幅
+        volume_average = round(volume_total / 100 / pctchg_amplitude)       # 平均
         volume_total = round(volume_total / 100)
         volume_yin = round(volume_yin / 100)
         volume_yang = round(volume_yang / 100)
