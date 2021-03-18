@@ -752,10 +752,12 @@ class SerialComm(QMainWindow, Ui_MainWindow):
 
 
     def show_ka_line(self):
+        kd = []
         rd = []
         gd = []
         rdv = []
         gdv = []
+        k15 = []
         r15 = []
         g15 = []
         r15v = []
@@ -763,7 +765,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
 
         start_date = self.start_date_edit.text()
         end_date = self.end_date_edit.text()
-        # end_date = str(datetime.datetime.now().date())
         stock_code = self.stock_code_lineEdit.text()
         stock_code_kd = 'k' + stock_code + '_d'
         stock_code_k15 = 'k' + stock_code + '_15'
@@ -779,8 +780,8 @@ class SerialComm(QMainWindow, Ui_MainWindow):
 
         for i in range(len(stock_dataframe_kd)):
             stock_dataframe_tmp_kd = stock_dataframe_kd.head(i)
-            show_datas_kd_close_red = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
-            show_datas_kd_close_green = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
+            show_datas_close_red_kd = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+            show_datas_close_green_kd = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Close", ascending=False)
 
             stock_az = stock_dataframe_tmp_kd['pctChg']
             x = np.arange(0, len(stock_az))
@@ -791,10 +792,10 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                 n = math.degrees(h)
             else:
                 n = 0
+            kd.append(n)
 
-
-            red_az = show_datas_kd_close_red['pctChg']
-            green_az = show_datas_kd_close_green['pctChg']
+            red_az = show_datas_close_red_kd['pctChg']
+            green_az = show_datas_close_green_kd['pctChg']
             x = np.arange(0, len(red_az))
             y = np.array(red_az)
             if np.size(x) >= 2:
@@ -814,10 +815,10 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                 g = 0
             gd.append(g)
 
-            show_datas_kd_volume_red = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
-            show_datas_kd_volume_green = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
-            red_az = show_datas_kd_volume_red['volumeChg']
-            green_az = show_datas_kd_volume_green['volumeChg']
+            show_datas_volume_red_kd = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
+            show_datas_volume_green_kd = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
+            red_az = show_datas_volume_red_kd['volumeChg']
+            green_az = show_datas_volume_green_kd['volumeChg']
             print("green_az", green_az)
             x = np.arange(0, len(red_az))
             y = np.array(red_az)
@@ -839,41 +840,72 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                 g = 0
             gdv.append(abs(g))
 
-        self.dc.update_figure_ex3(rd, gd, rdv, gdv)
-            # show_datas_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
-            # show_datas_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Close", ascending=False)
-            #
-            # red_az = show_datas_red['Close']
-            # x = np.arange(0, len(red_az))
-            # y = np.array(red_az)
-            # z = np.polyfit(x, y, 1)
-            # h = math.atan(z[0])
-            # r = math.degrees(h)
-            #
-            # green_az = show_datas_green['Close']
-            # x = np.arange(0, len(green_az))
-            # y = np.array(green_az)
-            # z = np.polyfit(x, y, 1)
-            # h = math.atan(z[0])
-            # g = math.degrees(h)
-            #
-            # show_datas_red = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
-            # show_datas_green = stock_dataframe_k15[(stock_dataframe_k15['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
-            #
-            # red_az = show_datas_red['volumeChg']
-            # x = np.arange(0, len(red_az))
-            # y = np.array(red_az)
-            # z = np.polyfit(x, y, 1)
-            # print("z[0]z[0]", z[0])
-            # h = math.atan(z[0])
-            # r = math.degrees(h)
-            #
-            # green_az = show_datas_green['volumeChg']
-            # x = np.arange(0, len(green_az))
-            # y = np.array(green_az)
-            # z = np.polyfit(x, y, 1)
-            # h = math.atan(z[0])
-            # g = math.degrees(h)
+        self.dc.update_figure_ex3(kd, rd, gd, rdv, gdv)
+
+        for i in range(len(stock_dataframe_k15)):
+            stock_dataframe_tmp_k15 = stock_dataframe_k15.head(i)
+            show_datas_close_red_k15 = stock_dataframe_tmp_k15[(stock_dataframe_tmp_k15['pctChg'] >= 0)].sort_values(by="Close", ascending=True)
+            show_datas_close_green_k15 = stock_dataframe_tmp_k15[(stock_dataframe_tmp_k15['pctChg'] < 0)].sort_values(by="Close", ascending=False)
+
+            stock_az = stock_dataframe_tmp_k15['pctChg']
+            x = np.arange(0, len(stock_az))
+            y = np.array(stock_az)
+            if np.size(x) >= 2:
+                z = np.polyfit(x, y, 1)
+                h = math.atan(z[0])
+                n = math.degrees(h)
+            else:
+                n = 0
+            k15.append(n)
+
+            red_az = show_datas_close_red_k15['pctChg']
+            green_az = show_datas_close_green_k15['pctChg']
+            x = np.arange(0, len(red_az))
+            y = np.array(red_az)
+            if np.size(x) >= 2:
+                z = np.polyfit(x, y, 1)
+                h = math.atan(z[0])
+                r = math.degrees(h)
+            else:
+                r = 0
+            r15.append(r)
+            x = np.arange(0, len(green_az))
+            y = np.array(green_az)
+            if np.size(x) >= 2:
+                z = np.polyfit(x, y, 1)
+                h = math.atan(z[0])
+                g = math.degrees(h)
+            else:
+                g = 0
+            g15.append(g)
+
+            show_datas_volume_red_k15 = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] >= 0)].sort_values(by="Volume", ascending=True)
+            show_datas_volume_green_k15 = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
+            red_az = show_datas_volume_red_k15['volumeChg']
+            green_az = show_datas_volume_green_k15['volumeChg']
+            x = np.arange(0, len(red_az))
+            y = np.array(red_az)
+            if np.size(x) >= 2:
+                z = np.polyfit(x, y, 1)
+                h = math.atan(z[0])
+                r = math.degrees(h)
+            else:
+                r = 0
+            r15v.append(r)
+            x = np.arange(0, len(green_az))
+            y = np.array(green_az)
+            if np.size(x) >= 2:
+                z = np.polyfit(x, y, 1)
+                h = math.atan(z[0])
+                g = math.degrees(h)
+            else:
+                g = 0
+            g15v.append(abs(g))
+
+        self.dc.update_figure_ex4(k15, r15, g15, r15v, g15v)
+
+
+
 
 
     def clear_figure(self):

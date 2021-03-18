@@ -98,9 +98,10 @@ class MyMplCanvas(FigureCanvas):
 
         # self.axes1  = plt.subplot(211)
         # self.axes2 = plt.subplot(212, sharex=self.axes1)
-        self.axes1 = self.fig.add_subplot(3, 1, 1)      # row = 2, col = 1, index = 1
-        self.axes2 = self.fig.add_subplot(3, 1, 2)      # row = 3, col = 1, index = 3
-        self.axes3 = self.fig.add_subplot(3, 1, 3)      # row = 3, col = 1, index = 3
+        self.axes1 = self.fig.add_subplot(4, 1, 1)      # row = 2, col = 1, index = 1
+        self.axes2 = self.fig.add_subplot(4, 1, 2)      # row = 3, col = 1, index = 3
+        self.axes3 = self.fig.add_subplot(4, 1, 3)      # row = 3, col = 1, index = 3
+        self.axes4 = self.fig.add_subplot(4, 1, 4)  # row = 3, col = 1, index = 3
         self.fig.subplots_adjust(bottom=0.2, wspace=0, hspace=0)
         # self.fig.subplots_adjust(wspace=0, hspace=0)
         #
@@ -131,15 +132,28 @@ class MyMplCanvas(FigureCanvas):
         # plt.xticks(rotation=30)
         self.draw()
 
-    def update_figure_ex3(self, rd, gd, rdv, gdv):
+    def update_figure_ex3(self, kd, rd, gd, rdv, gdv):
         self.axes3.clear()
         x = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         y = [23, 21, 32, 13, 3, 132, 13, 3, 1]
         xaxis = np.arange(0, len(rd))
+        self.axes3.plot(xaxis, kd, color='m')
         self.axes3.plot(xaxis, rd, color='r')
         self.axes3.plot(xaxis, gd, color='g')
         self.axes3.plot(xaxis, rdv, color='b')
         self.axes3.plot(xaxis, gdv, color='y')
+        self.draw()
+
+    def update_figure_ex4(self, k15, r15, g15, r15v, g15v):
+        self.axes4.clear()
+        x = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        y = [23, 21, 32, 13, 3, 132, 13, 3, 1]
+        xaxis = np.arange(0, len(r15))
+        self.axes4.plot(xaxis, k15, color='m')
+        self.axes4.plot(xaxis, r15, color='r')
+        self.axes4.plot(xaxis, g15, color='g')
+        self.axes4.plot(xaxis, r15v, color='b')
+        self.axes4.plot(xaxis, g15v, color='y')
         self.draw()
 
 
