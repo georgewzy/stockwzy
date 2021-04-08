@@ -819,7 +819,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
             show_datas_volume_green_kd = stock_dataframe_tmp_kd[(stock_dataframe_tmp_kd['pctChg'] < 0)].sort_values(by="Volume", ascending=False)
             red_az = show_datas_volume_red_kd['volumeChg']
             green_az = show_datas_volume_green_kd['volumeChg']
-            print("green_az", green_az)
             x = np.arange(0, len(red_az))
             y = np.array(red_az)
             if np.size(x) >= 2:
@@ -831,7 +830,6 @@ class SerialComm(QMainWindow, Ui_MainWindow):
             rdv.append(r)
             x = np.arange(0, len(green_az))
             y = np.array(green_az)
-            print("xy", x, y)
             if np.size(x) >= 2:
                 z = np.polyfit(x, y, 1)
                 h = math.atan(z[0])
@@ -902,7 +900,7 @@ class SerialComm(QMainWindow, Ui_MainWindow):
                 g = 0
             g15v.append(abs(g))
 
-        self.dc.update_figure_ex4(k15, r15, g15, r15v, g15v)
+        # self.dc.update_figure_ex4(k15, r15, g15, r15v, g15v)
 
 
 
